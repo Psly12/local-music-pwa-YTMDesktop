@@ -52,6 +52,45 @@
 			console.error('Failed to load playlist:', error)
 		}
 	}
+
+	// Swipe functionality
+	let touchStartX = 0
+	let touchStartY = 0
+	let isScrolling = false
+
+	const handleTouchStart = (e: TouchEvent) => {
+		touchStartX = e.touches[0].clientX
+		touchStartY = e.touches[0].clientY
+		isScrolling = false
+	}
+
+	const handleTouchMove = (e: TouchEvent) => {
+		// Check if user is scrolling vertically more than horizontally
+		const deltaY = Math.abs(e.touches[0].clientY - touchStartY)
+		const deltaX = Math.abs(e.touches[0].clientX - touchStartX)
+		
+		if (deltaY > deltaX * 1.5) {
+			isScrolling = true
+		}
+	}
+
+	const handleTouchEnd = (e: TouchEvent) => {
+		if (isScrolling) return
+		
+		const touchEndX = e.changedTouches[0].clientX
+		const swipeDistance = touchStartX - touchEndX
+		const minSwipeDistance = 80
+
+		if (Math.abs(swipeDistance) > minSwipeDistance) {
+			if (swipeDistance > 0 && activeTab === 'queue') {
+				// Swipe left: Queue -> Playlists
+				activeTab = 'playlists'
+			} else if (swipeDistance < 0 && activeTab === 'playlists') {
+				// Swipe right: Playlists -> Queue
+				activeTab = 'queue'
+			}
+		}
+	}
 </script>
 
 {#snippet playerSnippet()}
@@ -78,6 +117,7 @@
 				icon="moreVertical"
 				as="a" 
 				href="/settings"
+				class="min-h-12 min-w-12 touch-manipulation hover:bg-primary/10 focus:bg-primary/20"
 			/>
 		</div>
 
@@ -96,20 +136,20 @@
 					mainStore.volumeSliderEnabled ? 'pt-8 pb-4' : 'py-8',
 				]}
 			>
-				<div class="my-auto flex items-center justify-between gap-2">
-					<ShuffleButton />
+				<div class="my-auto flex items-center justify-between gap-4 sm:gap-2">
+					<ShuffleButton class="touch-manipulation" />
 
-					<PlayPrevButton />
+					<PlayPrevButton class="touch-manipulation" />
 
-					<PlayTogglePillButton />
+					<PlayTogglePillButton class="touch-manipulation" />
 
-					<PlayNextButton />
+					<PlayNextButton class="touch-manipulation" />
 
-					<RepeatButton />
+					<RepeatButton class="touch-manipulation" />
 				</div>
 
 				{#if mainStore.volumeSliderEnabled}
-					<div class="flex items-center gap-2">
+					<div class="flex items-center gap-3">
 						<IconButton 
 							icon="volumeMid" 
 							tooltip="Decrease volume" 
@@ -117,9 +157,12 @@
 								const newVolume = Math.max(0, player.volume - 10)
 								player.setVolume(newVolume)
 							}}
+							class="min-h-12 min-w-12 touch-manipulation"
 						/>
 
-						<Slider bind:value={player.volume} />
+						<div class="flex-1 py-2">
+							<Slider bind:value={player.volume} />
+						</div>
 
 						<IconButton 
 							icon="volumeHigh" 
@@ -128,6 +171,7 @@
 								const newVolume = Math.min(100, player.volume + 10)
 								player.setVolume(newVolume)
 							}}
+							class="min-h-12 min-w-12 touch-manipulation"
 						/>
 					</div>
 				{/if}
@@ -175,20 +219,25 @@
 		<!-- Tabs -->
 		<div class="flex gap-2 p-2 bg-secondaryContainer">
 			<button 
-				class="flex-1 py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl {activeTab === 'queue' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface'}"
+				class="flex-1 py-4 sm:py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl touch-manipulation min-h-12 sm:min-h-auto {activeTab === 'queue' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
 				onclick={() => activeTab = 'queue'}
 			>
 				Queue ({player.queue.length})
 			</button>
 			<button 
-				class="flex-1 py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl {activeTab === 'playlists' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface'}"
+				class="flex-1 py-4 sm:py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl touch-manipulation min-h-12 sm:min-h-auto {activeTab === 'playlists' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
 				onclick={() => activeTab = 'playlists'}
 			>
 				Playlists ({playlists.length})
 			</button>
 		</div>
 
-		<div class="flex grow p-4">
+		<div 
+			class="flex grow p-4 touch-pan-y overflow-hidden"
+			ontouchstart={handleTouchStart}
+			ontouchmove={handleTouchMove}
+			ontouchend={handleTouchEnd}
+		>
 			{#if activeTab === 'queue'}
 				{#if player.isQueueEmpty}
 					<div class="m-auto flex flex-col items-center text-center">
@@ -229,7 +278,7 @@
 								No music playing. Start playing music in YouTube Music Desktop.
 							{/if}
 						</div>
-						<Button kind="outlined" as="a" href="/settings">
+						<Button kind="outlined" as="a" href="/settings" class="min-h-12 touch-manipulation">
 							Open Settings
 						</Button>
 					</div>
@@ -238,7 +287,7 @@
 					<div class="flex flex-col gap-2 w-full">
 						{#each player.queue as track, index}
 							<button 
-								class="flex items-center gap-3 p-2 rounded bg-surfaceContainer hover:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left {index === player.activeTrackIndex ? 'ring-2 ring-primary' : ''}"
+								class="flex items-center gap-3 p-4 sm:p-2 rounded-lg bg-surfaceContainer hover:bg-surfaceContainerHigh active:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left touch-manipulation min-h-16 sm:min-h-auto {index === player.activeTrackIndex ? 'ring-2 ring-primary' : ''}"
 								onclick={() => player.playTrackAtIndex(index)}
 							>
 								{#if track.thumbnail}
@@ -270,7 +319,7 @@
 								class="color-onSecondaryContainer my-auto size-35 opacity-54"
 							/>
 							<div class="mb-4 text-body-lg">Connect to YouTube Music Desktop to see your playlists</div>
-							<Button kind="outlined" as="a" href="/settings">
+							<Button kind="outlined" as="a" href="/settings" class="min-h-12 touch-manipulation">
 								Open Settings
 							</Button>
 						</div>
@@ -288,7 +337,7 @@
 					{:else}
 						{#each playlists as playlist}
 							<button 
-								class="flex items-center gap-3 p-3 rounded bg-surfaceContainer hover:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left"
+								class="flex items-center gap-3 p-4 sm:p-3 rounded-lg bg-surfaceContainer hover:bg-surfaceContainerHigh active:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left touch-manipulation min-h-16 sm:min-h-auto"
 								onclick={() => loadPlaylist(playlist.id)}
 							>
 								{#if playlist.thumbnail}

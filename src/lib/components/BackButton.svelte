@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ClassValue } from 'clsx'
 	import { goto } from '$app/navigation'
+	import { page } from '$app/state'
 	import IconButton from './IconButton.svelte'
 	import * as m from '$paraglide/messages.js'
 
@@ -20,6 +21,12 @@
 	}
 
 	const handleBackClick = () => {
+		// If we're in settings, always go to player
+		if (page.url.pathname.includes('/settings')) {
+			void goto('/player')
+			return
+		}
+
 		if (canGoBack()) {
 			window.history.back()
 		} else {

@@ -7,8 +7,11 @@
 	"scripts": {
 		"prepare": "svelte-kit sync",
 		"dev": "vite dev",
+		"dev:host": "vite dev --host",
 		"build": "vite build",
+		"build:prod": "pnpm run check && pnpm run test && vite build",
 		"preview": "vite preview",
+		"preview:host": "vite preview --host",
 		"check": "svelte-kit sync && svelte-check",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"biome-check": "biome check ./src",
@@ -17,7 +20,12 @@
 		"prettier-fix": "prettier --write ./src",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest run",
-		"coverage": "vitest run --coverage"
+		"coverage": "vitest run --coverage",
+		"deploy:setup": "node scripts/deploy-setup.js",
+		"deploy:build": "pnpm run deploy:setup && pnpm run build:prod",
+		"deploy:local": "pnpm run deploy:build && pnpm run preview:host",
+		"install:deps": "pnpm install --frozen-lockfile",
+		"install:clean": "rm -rf node_modules pnpm-lock.yaml && pnpm install"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",

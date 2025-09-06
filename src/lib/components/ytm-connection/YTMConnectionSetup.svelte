@@ -150,6 +150,12 @@
 				{#if ytmStore.isConnected}
 					<div class="status connected">
 						✓ Connected to YouTube Music Desktop
+						{#if ytmStore.getConnectionHealth().timeUntilExpiry}
+							{@const hoursUntilExpiry = Math.floor(ytmStore.getConnectionHealth().timeUntilExpiry! / (1000 * 60 * 60))}
+							<small class="token-info">
+								Token expires in {hoursUntilExpiry}h
+							</small>
+						{/if}
 					</div>
 				{:else if ytmStore.lastError}
 					<div class="status error">
@@ -356,5 +362,12 @@
 	.text-field-input:focus {
 		outline: 2px solid var(--primary);
 		outline-offset: -2px;
+	}
+
+	.token-info {
+		display: block;
+		font-size: 0.75rem;
+		margin-top: 0.25rem;
+		opacity: 0.8;
 	}
 </style>

@@ -115,6 +115,7 @@ export interface YTMConnection {
 	port: number
 	token?: string
 	connected: boolean
+	tokenExpiryTime?: number
 }
 
 export interface YTMSettings {

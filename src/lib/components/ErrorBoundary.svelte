@@ -63,7 +63,7 @@
 </script>
 
 {#if hasError && error}
-	{@render (fallback || defaultFallback)(error)}
-{:else}
+	{@render (fallback || defaultFallback)?.(error)}
+{:else if children}
 	{@render children()}
 {/if}

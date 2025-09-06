@@ -45,10 +45,10 @@ export class MainStore {
 
 	/**
 	 * Controls whatever volume slider is visible.
-	 * The initial value is false for mobile devices and true for desktop.
+	 * The initial value is true for all devices since YTM Desktop integration supports volume control.
 	 * User can change this setting.
 	 */
-	volumeSliderEnabled: boolean = $state(supportsChangingAudioVolume() ? !isMobile() : false)
+	volumeSliderEnabled: boolean = $state(supportsChangingAudioVolume())
 
 	createNewPlaylistDialogOpen: boolean = $state(false)
 

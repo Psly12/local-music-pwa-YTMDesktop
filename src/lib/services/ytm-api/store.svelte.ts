@@ -103,8 +103,8 @@ class YTMStore {
 			const existingConnection = this.client.getCurrentConnection()
 			logger.ytm.debug('Checking existing connection', { existingConnection })
 			
-			if (existingConnection?.token && existingConnection.host === host && existingConnection.port === port) {
-				logger.ytm.debug('Using existing token, testing validity...')
+			if (existingConnection?.token && existingConnection.host === host && existingConnection.port === port && this.client.isTokenValid()) {
+				logger.ytm.debug('Using existing valid token, testing connection...')
 				try {
 					// Test if existing token is still valid
 					await this.client.getPlayerState()
@@ -116,34 +116,60 @@ class YTMStore {
 					logger.ytm.warn('Existing token is invalid, clearing and requesting new auth...', tokenError)
 					this.client.clearConnection()
 				}
+			} else if (existingConnection?.token) {
+				logger.ytm.warn('Existing token is expired or for different host, clearing...')
+				this.client.clearConnection()
 			}
 
 			logger.ytm.info('Requesting new auth code...')
-			// Request authentication
+			// Request authentication with enhanced handshake
 			const code = await this.client.requestAuthCode({
-				appId: 'local-music-pwa',
-				appName: 'Local Music PWA',
-				appVersion: '1.0.0'
+				appId: 'local-music-pwa-enhanced',
+				appName: 'Local Music PWA (Enhanced)',
+				appVersion: '2.0.0'
 			}, host, port)
 
 			logger.ytm.info(`Auth code received: ${code}. Please approve the connection in YouTube Music Desktop within 30 seconds.`)
 
-			// Give user time to approve (API docs say 30 seconds, but we'll give a bit more time)
-			logger.ytm.debug('Waiting 5 seconds for user to approve...')
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			// Enhanced waiting with progress indication
+			logger.ytm.debug('Waiting for user approval with enhanced retry logic...')
+			let approved = false
+			let attempts = 0
+			const maxAttempts = 6 // 30 seconds total
 
-			logger.ytm.debug('Exchanging code for token...')
-			const token = await this.client.exchangeToken({
-				appId: 'local-music-pwa',
-				code
-			}, host, port)
+			while (!approved && attempts < maxAttempts) {
+				await new Promise(resolve => setTimeout(resolve, 5000))
+				attempts++
+				
+				try {
+					logger.ytm.debug(`Attempting token exchange (${attempts}/${maxAttempts})...`)
+					const token = await this.client.exchangeToken({
+						appId: 'local-music-pwa-enhanced',
+						code
+					}, host, port)
+					
+					logger.ytm.info('Token received successfully!')
+					approved = true
+					break
+				} catch (exchangeError) {
+					if (attempts < maxAttempts) {
+						logger.ytm.debug(`Token exchange failed, retrying... (${attempts}/${maxAttempts})`)
+					} else {
+						throw exchangeError
+					}
+				}
+			}
 
-			logger.ytm.info('Token received, connecting socket...')
+			if (!approved) {
+				throw new Error('User did not approve the connection request within 30 seconds. Please try again.')
+			}
+
+			logger.ytm.info('Establishing enhanced socket connection...')
 			await this.connectSocket()
 			await this.loadInitialData()
 
 			this.connecting = false
-			logger.ytm.info('Connection successful!')
+			logger.ytm.info('Enhanced connection established successfully!')
 			return true
 		} catch (error) {
 			logger.ytm.error('Connection failed', error)
@@ -289,6 +315,29 @@ class YTMStore {
 
 	setConnection(connection: YTMConnection): void {
 		this.client.setConnection(connection)
+	}
+
+	isTokenValid(): boolean {
+		return this.client.isTokenValid()
+	}
+
+	getTokenExpiryTime(): number | null {
+		return this.client.getTokenExpiryTime()
+	}
+
+	getConnectionHealth(): { 
+		connected: boolean
+		tokenValid: boolean
+		expiryTime: number | null
+		timeUntilExpiry: number | null
+	} {
+		const expiryTime = this.getTokenExpiryTime()
+		return {
+			connected: this.isConnected,
+			tokenValid: this.isTokenValid(),
+			expiryTime,
+			timeUntilExpiry: expiryTime ? expiryTime - Date.now() : null
+		}
 	}
 }
 

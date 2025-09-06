@@ -18,22 +18,24 @@ const config: Config = {
 		alias: {
 			$paraglide: './.generated/paraglide',
 		},
-		csp: {
-			mode: 'auto',
-			directives: {
-				'default-src': ['none'],
-				'script-src': ['self', 'unsafe-inline', 'https://gc.zgo.at/'],
-				'style-src': ['self', 'unsafe-inline'],
-				'img-src': ['self', 'blob:', 'data:', 'https:', 'https://snaeplayer.goatcounter.com/count', 'https://lh3.googleusercontent.com', 'https://yt3.ggpht.com', 'https://i.ytimg.com'],
-				'media-src': ['self', 'blob:'],
-				'font-src': ['self'],
-				'connect-src': ['self', 'https://snaeplayer.goatcounter.com', 'http://localhost:*', 'http://127.0.0.1:*', 'ws://localhost:*', 'ws://127.0.0.1:*'],
-				'form-action': ['none'],
-				'manifest-src': ['self'],
-				'base-uri': ['none'],
-				'worker-src': ['self'],
+		...(process.env.NODE_ENV === 'production' ? {
+			csp: {
+				mode: 'auto',
+				directives: {
+					'default-src': ['none'],
+					'script-src': ['self', 'unsafe-inline', 'https://gc.zgo.at/'],
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': ['self', 'blob:', 'data:', 'https:', 'https://snaeplayer.goatcounter.com/count', 'https://lh3.googleusercontent.com', 'https://yt3.ggpht.com', 'https://i.ytimg.com'],
+					'media-src': ['self', 'blob:'],
+					'font-src': ['self'],
+					'connect-src': ['self', 'https://snaeplayer.goatcounter.com', 'http://localhost:*', 'http://127.0.0.1:*', 'ws://localhost:*', 'ws://127.0.0.1:*', 'http://10.*:*', 'http://192.168.*:*', 'http://172.*:*', 'ws://10.*:*', 'ws://192.168.*:*', 'ws://172.*:*'],
+					'form-action': ['none'],
+					'manifest-src': ['self'],
+					'base-uri': ['none'],
+					'worker-src': ['self'],
+				},
 			},
-		},
+		} : {}),
 		typescript: {
 			config: (tsConfig) => {
 				tsConfig.extends = '../../tsconfig.base.json'

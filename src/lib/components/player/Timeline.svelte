@@ -63,6 +63,7 @@
 
 			playerSeek(seekingValue)
 		}}
+		class="touch-manipulation py-2 sm:py-1"
 	/>
 
 	<div class="text-right text-body-sm">

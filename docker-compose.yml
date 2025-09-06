@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  local-music-pwa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4173:4173"
+    environment:
+      - NODE_ENV=production
+      - VITE_HOST=0.0.0.0
+      - VITE_PORT=4173
+    volumes:
+      # Optional: Mount config file
+      - ./deploy-config.json:/app/deploy-config.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - local-music-network
+
+  # Optional: Add YTM Desktop proxy for network access
+  ytm-proxy:
+    image: nginx:alpine
+    ports:
+      - "9863:9863"
+    volumes:
+      - ./nginx-ytm-proxy.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - local-music-pwa
+    restart: unless-stopped
+    networks:
+      - local-music-network
+    profiles:
+      - ytm-proxy
+
+networks:
+  local-music-network:
+    driver: bridge

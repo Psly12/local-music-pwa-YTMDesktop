@@ -14,6 +14,7 @@
 	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
+	import '$lib/helpers/browser-polyfills.ts'
 
 	// These context keys are in different files from their implementation
 	// to allow better trees shaking and inlining
@@ -124,7 +125,7 @@
 		{/if}
 
 		{#if bottomBar.snippet}
-			{@render bottomBar.snippet()}
+			{@render bottomBar.snippet?.()}
 		{/if}
 	</div>
 </div>

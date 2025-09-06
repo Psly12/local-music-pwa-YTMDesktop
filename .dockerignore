@@ -1,0 +1,77 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+build
+dist
+.svelte-kit
+
+# Environment files
+.env*
+!.env.example
+
+# Development files
+.vscode
+.idea
+*.log
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation
+*.md
+docs/
+
+# Deployment scripts
+scripts/
+start-*.sh
+start-*.bat
+deploy-config.json
+
+# Coverage and test files
+coverage/
+.nyc_output/
+test-results/
+
+# Cache directories
+.cache
+.parcel-cache
+.turbo
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Yarn
+yarn-error.log
+.yarn-integrity
+
+# Temporary folders
+tmp/
+temp/
