@@ -28,10 +28,8 @@ export class YTMAPIClient {
 	}
 
 	private getBaseUrl(host: string = '127.0.0.1', port: number = 9863): string {
-		// Try to use secure connection if the current page is HTTPS
-		const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' 
-			? 'https'  // Attempt HTTPS first for secure contexts
-			: 'http'   // Default to HTTP for local development
+		// YTM Desktop API always runs on HTTP, regardless of the host page protocol
+		const protocol = 'http'
 		
 		return `${protocol}://${host}:${port}/api/v1`
 	}
@@ -158,10 +156,8 @@ export class YTMAPIClient {
 			throw new Error('Not authenticated')
 		}
 
-		// Use the same protocol detection as HTTP requests
-		const httpProtocol = typeof window !== 'undefined' && window.location.protocol === 'https:' 
-			? 'https'  // Secure HTTP for HTTPS contexts
-			: 'http'   // Regular HTTP for HTTP contexts
+		// YTM Desktop API always runs on HTTP, regardless of the host page protocol
+		const httpProtocol = 'http'
 
 		const socketUrl = `${httpProtocol}://${this.connection.host}:${this.connection.port}/api/v1/realtime`
 		console.log('[YTM Client] Connecting socket to:', socketUrl)

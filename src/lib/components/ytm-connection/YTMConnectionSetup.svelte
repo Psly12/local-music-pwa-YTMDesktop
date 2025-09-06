@@ -16,6 +16,14 @@
 	let port = $state(9863)
 	let enableYTM = $state(false)
 	
+	// Local connecting state for debugging
+	let localConnecting = $state(false)
+	
+	// Debug: Track when values change
+	$effect(() => {
+		console.log('[YTMConnectionSetup] State values changed:', { host, port, enableYTM })
+	})
+	
 	// Saved connections
 	let savedConnections = $state<YTMConnection[]>([])
 
@@ -26,9 +34,13 @@
 		const savedPort = localStorage.getItem('ytm-port')
 		const savedEnableYTM = localStorage.getItem('ytm-enabled')
 		
+		console.log('[YTMConnectionSetup] Loading from localStorage:', { savedHost, savedPort, savedEnableYTM })
+		
 		if (savedHost) host = savedHost
 		if (savedPort) port = parseInt(savedPort, 10) || 9863
 		if (savedEnableYTM) enableYTM = savedEnableYTM === 'true'
+		
+		console.log('[YTMConnectionSetup] Set initial values:', { host, port, enableYTM })
 
 		// Persist changes
 		$effect(() => {
@@ -36,18 +48,23 @@
 				localStorage.setItem('ytm-host', host)
 				localStorage.setItem('ytm-port', port.toString())
 				localStorage.setItem('ytm-enabled', enableYTM.toString())
+				console.log('[YTMConnectionSetup] Persisted settings:', { host, port, enableYTM })
 			} catch (error) {
 				console.warn('Failed to persist YTM settings:', error)
 			}
 		})
 	})
 
-	// Load existing connection on mount
+	// Load existing connection on mount (only if not already set from localStorage)
 	$effect(() => {
 		const existing = ytmStore.getCurrentConnection()
 		if (existing) {
-			host = existing.host
-			port = existing.port
+			console.log('[YTMConnectionSetup] Found existing connection:', existing)
+			// Only update if we don't have localStorage values
+			if (host === '127.0.0.1' && port === 9863) {
+				host = existing.host
+				port = existing.port
+			}
 			enableYTM = true
 		}
 	})
@@ -62,27 +79,83 @@
 			return
 		}
 
-		const success = await ytmStore.connect(host, port)
+		// Debug: Log current values before connecting
+		console.log('[YTMConnectionSetup] Connecting with values:', { host, port })
+		console.log('[YTMConnectionSetup] Raw host value:', JSON.stringify(host))
+		console.log('[YTMConnectionSetup] Raw port value:', JSON.stringify(port))
+		console.log('[YTMConnectionSetup] Store state before connect:', { 
+			isConnecting: ytmStore.isConnecting, 
+			isConnected: ytmStore.isConnected,
+			lastError: ytmStore.lastError 
+		})
 		
-		if (success) {
-			// Save this connection for future use
-			const connection: YTMConnection = {
-				host,
-				port,
-				token: ytmStore.getCurrentConnection()?.token,
-				connected: true
-			}
+		// Force a small delay to ensure any pending input events are processed
+		await new Promise(resolve => setTimeout(resolve, 10))
+		
+		// Also try to get values directly from form elements as backup
+		const hostInput = document.querySelector('input[name="ytm-host"]') as HTMLInputElement
+		const portInput = document.querySelector('input[name="ytm-port"]') as HTMLInputElement
+		
+		console.log('[YTMConnectionSetup] DOM input values:', { 
+			hostFromDOM: hostInput?.value, 
+			portFromDOM: portInput?.value 
+		})
+		
+		// Use DOM values if they differ from state (binding issue detection)
+		const formHostValue = hostInput?.value || host
+		const formPortValue = portInput?.value ? parseInt(portInput.value, 10) : port
+		
+		// Ensure we have the latest values from the form
+		const currentHost = (formHostValue || '').trim() || '127.0.0.1'
+		const currentPort = formPortValue || 9863
+		
+		console.log('[YTMConnectionSetup] After delay, using normalized values:', { currentHost, currentPort })
+
+		// Set local connecting state
+		localConnecting = true
+		
+		try {
+			const success = await ytmStore.connect(currentHost, currentPort)
 			
-			// Add to saved connections if not already there
-			const existingIndex = savedConnections.findIndex(
-				c => c.host === host && c.port === port
-			)
+			// Force a small delay to ensure UI has time to update
+			await new Promise(resolve => setTimeout(resolve, 100))
 			
-			if (existingIndex >= 0) {
-				savedConnections[existingIndex] = connection
-			} else {
-				savedConnections.push(connection)
+			console.log('[YTMConnectionSetup] Connection result:', { 
+				success,
+				isConnecting: ytmStore.isConnecting, 
+				isConnected: ytmStore.isConnected,
+				lastError: ytmStore.lastError 
+			})
+			
+			if (success) {
+				// Save this connection for future use
+				const connection: YTMConnection = {
+					host: currentHost,
+					port: currentPort,
+					token: ytmStore.getCurrentConnection()?.token,
+					connected: true
+				}
+				
+				// Add to saved connections if not already there
+				const existingIndex = savedConnections.findIndex(
+					c => c.host === currentHost && c.port === currentPort
+				)
+				
+				if (existingIndex >= 0) {
+					savedConnections[existingIndex] = connection
+				} else {
+					savedConnections.push(connection)
+				}
+				
+				// Update the form values with the normalized values
+				host = currentHost
+				port = currentPort
 			}
+		} catch (error) {
+			console.error('[YTMConnectionSetup] Connection threw error:', error)
+		} finally {
+			// Always clear local connecting state
+			localConnecting = false
 		}
 	}
 
@@ -135,10 +208,10 @@
 			<div class="connection-actions">
 				<Button 
 					onclick={handleConnect}
-					disabled={ytmStore.isConnecting}
+					disabled={ytmStore.isConnecting || localConnecting}
 					kind={ytmStore.isConnected ? 'outlined' : 'filled'}
 				>
-					{#if ytmStore.isConnecting}
+					{#if ytmStore.isConnecting || localConnecting}
 						Connecting...
 					{:else if ytmStore.isConnected}
 						Disconnect
@@ -164,10 +237,16 @@
 				{/if}
 			</div>
 
-			{#if ytmStore.isConnecting}
+			{#if ytmStore.isConnecting || localConnecting}
 				<div class="connection-help">
 					<p>Please approve the connection request in YouTube Music Desktop app.</p>
 					<p>Look for a notification asking you to approve "Local Music PWA".</p>
+					{#if localConnecting}
+						<p><small>Debug: Local connecting state is active</small></p>
+					{/if}
+					{#if ytmStore.isConnecting}
+						<p><small>Debug: Store connecting state is active</small></p>
+					{/if}
 				</div>
 			{/if}
 

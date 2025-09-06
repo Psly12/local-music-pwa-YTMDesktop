@@ -89,15 +89,18 @@ class YTMStore {
 		try {
 			// First, test if YTM Desktop is running by trying to reach the API
 			logger.ytm.debug('Testing if YTM Desktop is reachable...', { host, port })
+			logger.ytm.info('MANUAL CONNECT: About to make HEAD request to test reachability')
 			const testResponse = await fetch(`http://${host}:${port}/api/v1/state`, {
 				method: 'HEAD',
 				mode: 'cors'
 			}).catch(e => {
 				logger.ytm.error('YTM Desktop not reachable', e, { host, port })
+				logger.ytm.error('MANUAL CONNECT: HEAD request failed with error:', e)
 				throw new Error(`YouTube Music Desktop is not running or not accessible at ${host}:${port}. Please ensure YTM Desktop is installed, running, and has the "Remote Control API" enabled in Settings → Integrations.`)
 			})
 
 			logger.ytm.debug('YTM Desktop is reachable', { host, port })
+			logger.ytm.info('MANUAL CONNECT: HEAD request succeeded')
 
 			// First try to connect with existing token if available
 			const existingConnection = this.client.getCurrentConnection()
@@ -105,28 +108,33 @@ class YTMStore {
 			
 			if (existingConnection?.token && existingConnection.host === host && existingConnection.port === port && this.client.isTokenValid()) {
 				logger.ytm.debug('Using existing valid token, testing connection...')
+				logger.ytm.info('AUTO-CONNECT PATH: Found existing valid token, skipping auth flow')
 				try {
 					// Test if existing token is still valid
 					await this.client.getPlayerState()
 					logger.ytm.info('Existing token is valid, connecting socket...')
+					logger.ytm.info('AUTO-CONNECT PATH: Token verification succeeded')
 					await this.connectSocket()
 					this.connecting = false
 					return true
 				} catch (tokenError) {
 					logger.ytm.warn('Existing token is invalid, clearing and requesting new auth...', tokenError)
+					logger.ytm.warn('AUTO-CONNECT PATH: Token verification failed, falling back to auth flow')
 					this.client.clearConnection()
 				}
 			} else if (existingConnection?.token) {
 				logger.ytm.warn('Existing token is expired or for different host, clearing...')
+				logger.ytm.warn('TOKEN MISMATCH: Clearing existing connection due to host/port/expiry mismatch')
 				this.client.clearConnection()
 			}
 
 			logger.ytm.info('Requesting new auth code...')
-			// Request authentication with enhanced handshake
+			logger.ytm.info('AUTH FLOW PATH: Starting fresh authentication flow')
+			// Request authentication with correct protocol
 			const code = await this.client.requestAuthCode({
-				appId: 'local-music-pwa-enhanced',
-				appName: 'Local Music PWA (Enhanced)',
-				appVersion: '2.0.0'
+				appId: 'localmusicpwa',  // Must be lowercase alphanumeric, 2-32 chars
+				appName: 'Local Music PWA',
+				appVersion: '1.0.0'
 			}, host, port)
 
 			logger.ytm.info(`Auth code received: ${code}. Please approve the connection in YouTube Music Desktop within 30 seconds.`)
@@ -144,7 +152,7 @@ class YTMStore {
 				try {
 					logger.ytm.debug(`Attempting token exchange (${attempts}/${maxAttempts})...`)
 					const token = await this.client.exchangeToken({
-						appId: 'local-music-pwa-enhanced',
+						appId: 'localmusicpwa',  // Must match the requestcode appId
 						code
 					}, host, port)
 					

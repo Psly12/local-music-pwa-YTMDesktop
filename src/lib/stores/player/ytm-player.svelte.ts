@@ -293,9 +293,23 @@ export class YTMPlayerStore {
 			// Try to reconnect with existing credentials
 			await ytmStore.connect(existingConnection.host, existingConnection.port)
 		} else {
-			console.log('[YTMPlayer] No existing token, trying default connection...')
-			// Try to connect to default YTM Desktop instance
-			await ytmStore.connect('127.0.0.1', 9863)
+			console.log('[YTMPlayer] No existing token, checking localStorage for saved settings...')
+			
+			// Get saved connection settings from localStorage (same as YTMConnectionSetup)
+			const savedHost = localStorage.getItem('ytm-host')
+			const savedPort = localStorage.getItem('ytm-port')
+			const savedEnabled = localStorage.getItem('ytm-enabled')
+			
+			if (savedEnabled === 'true' && savedHost) {
+				const host = savedHost
+				const port = savedPort ? parseInt(savedPort, 10) || 9863 : 9863
+				console.log('[YTMPlayer] Using saved settings from localStorage:', { host, port })
+				await ytmStore.connect(host, port)
+			} else {
+				console.log('[YTMPlayer] No saved settings, trying default connection...')
+				// Try to connect to default YTM Desktop instance
+				await ytmStore.connect('127.0.0.1', 9863)
+			}
 		}
 	}
 

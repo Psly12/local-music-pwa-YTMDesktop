@@ -19,7 +19,12 @@
       "Bash(git checkout:*)",
       "Bash(curl:*)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(timeout 10 pnpm run preview:host)",
+      "Bash(echo $NODE_ENV)",
+      "Bash(NODE_ENV=production pnpm run build)"
     ],
     "deny": [],
     "ask": []
