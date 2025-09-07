@@ -76,7 +76,18 @@ export class YTMAPIClient {
 			this.reconnectAttempts = 0
 			this.reconnectDelay = 1000
 
-			return response.json()
+			// Handle empty responses gracefully
+			const text = await response.text()
+			if (!text.trim()) {
+				return null // Empty response is OK for some commands
+			}
+			
+			try {
+				return JSON.parse(text)
+			} catch (jsonError) {
+				console.warn('[YTM Client] Failed to parse JSON response:', text)
+				throw new Error(`Invalid JSON response: ${jsonError.message}`)
+			}
 		} catch (error) {
 			// Handle network errors with retry
 			if (retryCount < 3 && (error instanceof TypeError || error.message.includes('fetch'))) {

@@ -22,6 +22,7 @@ export class YTMPlayerStore {
 	#volume = $state(100)
 	#shuffleState = $state(false) // Track shuffle state client-side since API doesn't provide it
 	#currentTrackWithColor = $state<YTMTrack | null>(null) // Cache current track with extracted color
+	#muted = $state(false) // Track mute state client-side
 
 	get volume() {
 		return this.#volume
@@ -31,11 +32,19 @@ export class YTMPlayerStore {
 		this.#volume = value
 		// Sync with YTM
 		if (ytmStore.isConnected) {
-			ytmStore.setVolume(value)
+			ytmStore.setVolume(value).catch(error => {
+				console.warn('Failed to sync volume to YTM:', error)
+			})
 		}
 	}
 
-	muted: boolean = $state(false)
+	get muted(): boolean {
+		return this.#muted
+	}
+
+	set muted(value: boolean) {
+		this.#muted = value
+	}
 
 	// YTM-derived properties
 	get playing(): boolean {
@@ -264,6 +273,35 @@ export class YTMPlayerStore {
 	setVolume = async (volume: number): Promise<void> => {
 		this.volume = volume
 	}
+
+	toggleMute = async (): Promise<void> => {
+		if (!ytmStore.isConnected) {
+			console.warn('Not connected to YouTube Music Desktop')
+			return
+		}
+
+		// Toggle mute state
+		if (this.#muted) {
+			await ytmStore.unmute()
+			this.#muted = false
+		} else {
+			await ytmStore.mute()
+			this.#muted = true
+		}
+	}
+
+	mute = async (): Promise<void> => {
+		if (!ytmStore.isConnected) return
+		await ytmStore.mute()
+		this.#muted = true
+	}
+
+	unmute = async (): Promise<void> => {
+		if (!ytmStore.isConnected) return
+		await ytmStore.unmute()
+		this.#muted = false
+	}
+
 
 	likeTrack = async (): Promise<void> => {
 		if (!ytmStore.isConnected) return

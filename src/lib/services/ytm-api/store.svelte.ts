@@ -315,6 +315,18 @@ class YTMStore {
 		await this.client.sendCommand('setVolume', volume)
 	}
 
+	async mute(): Promise<void> {
+		if (!this.connected) return
+		console.log('[YTM Store] Muting audio')
+		await this.client.sendCommand('mute')
+	}
+
+	async unmute(): Promise<void> {
+		if (!this.connected) return
+		console.log('[YTM Store] Unmuting audio')
+		await this.client.sendCommand('unmute')
+	}
+
 	async seek(position: number): Promise<void> {
 		if (!this.connected) return
 		await this.client.sendCommand('seekTo', position)

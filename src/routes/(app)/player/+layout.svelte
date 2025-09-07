@@ -11,6 +11,7 @@
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+	import MuteToggleButton from '$lib/components/player/buttons/MuteToggleButton.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import Slider from '$lib/components/Slider.svelte'
@@ -18,6 +19,7 @@
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import { useMainStore } from '$lib/stores/main/use-store.ts'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
+	import * as m from '$paraglide/messages'
 
 	const { data } = $props()
 
@@ -150,15 +152,7 @@
 
 				{#if mainStore.volumeSliderEnabled}
 					<div class="flex items-center gap-3">
-						<IconButton 
-							icon="volumeMid" 
-							tooltip="Decrease volume" 
-							onclick={() => {
-								const newVolume = Math.max(0, player.volume - 10)
-								player.setVolume(newVolume)
-							}}
-							class="min-h-12 min-w-12 touch-manipulation"
-						/>
+						<MuteToggleButton class="min-h-12 min-w-12 touch-manipulation" />
 
 						<div class="flex-1 py-2">
 							<Slider bind:value={player.volume} />
@@ -169,7 +163,7 @@
 							tooltip="Increase volume"
 							onclick={() => {
 								const newVolume = Math.min(100, player.volume + 10)
-								player.setVolume(newVolume)
+								player.volume = newVolume
 							}}
 							class="min-h-12 min-w-12 touch-manipulation"
 						/>
