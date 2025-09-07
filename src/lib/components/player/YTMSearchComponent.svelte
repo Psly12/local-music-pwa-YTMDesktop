@@ -100,13 +100,13 @@
 			disabled={!searchQuery.trim() || searching}
 			class="px-4 py-3 bg-primary text-onPrimary rounded-lg hover:bg-primary/90 disabled:opacity-50"
 		>
-			<Icon name="search" />
+			<Icon type="search" />
 		</Button>
 	</div>
 
 	{#if error}
 		<div class="flex flex-col items-center text-center py-8">
-			<Icon name="alert" class="w-12 h-12 text-error mb-4" />
+			<Icon type="alert" class="w-12 h-12 text-error mb-4" />
 			<p class="text-error">{error}</p>
 		</div>
 	{:else if searchResults.length > 0}
@@ -114,7 +114,7 @@
 		{#if !player.isConnected}
 			<div class="mb-4 p-3 bg-surfaceContainer rounded-xl border-l-4 border-l-error">
 				<div class="flex items-center gap-2">
-					<Icon name="wifiOff" class="w-5 h-5 text-error" />
+					<Icon type="wifiOff" class="w-5 h-5 text-error" />
 					<p class="text-onSurface text-sm">
 						<strong>Not connected to YTM Desktop</strong> - You can search, but need to connect to play music
 					</p>
@@ -135,7 +135,7 @@
 								/>
 							{:else}
 								<div class="w-full h-full flex items-center justify-center">
-									<Icon name="music" class="w-6 h-6 text-onSurfaceVariant" />
+									<Icon type="music" class="w-6 h-6 text-onSurfaceVariant" />
 								</div>
 							{/if}
 						</div>
@@ -168,7 +168,7 @@
 									class="p-2 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									title={player.isConnected ? "Play now" : "Connect to YTM Desktop to play"}
 								>
-									<Icon name="play" class="w-5 h-5 text-primary" />
+									<Icon type="play" class="w-5 h-5 text-primary" />
 								</button>
 								<button
 									onclick={() => addToQueue(result.videoId!)}
@@ -176,7 +176,7 @@
 									class="p-2 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									title={player.isConnected ? "Add to queue" : "Connect to YTM Desktop to add to queue"}
 								>
-									<Icon name="plus" class="w-5 h-5 text-primary" />
+									<Icon type="plus" class="w-5 h-5 text-primary" />
 								</button>
 							{/if}
 						</div>
@@ -186,12 +186,12 @@
 		</div>
 	{:else if searchQuery.trim()}
 		<div class="flex flex-col items-center text-center py-8">
-			<Icon name="search" class="w-12 h-12 text-onSurfaceVariant mb-4" />
+			<Icon type="search" class="w-12 h-12 text-onSurfaceVariant mb-4" />
 			<p class="text-onSurfaceVariant">Enter a search term and press Enter or click Search</p>
 		</div>
 	{:else}
 		<div class="flex flex-col items-center text-center py-8">
-			<Icon name="search" class="w-12 h-12 text-onSurfaceVariant mb-4" />
+			<Icon type="search" class="w-12 h-12 text-onSurfaceVariant mb-4" />
 			<p class="text-onSurfaceVariant">Search YouTube Music</p>
 			<p class="text-onSurfaceVariant text-sm mt-2">Find songs, albums, and artists</p>
 		</div>
