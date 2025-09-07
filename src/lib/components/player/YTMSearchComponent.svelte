@@ -55,15 +55,6 @@
 		}
 	}
 
-	const addToQueue = async (videoId: string) => {
-		if (!videoId) return
-		
-		try {
-			await player.addVideoToQueue(videoId)
-		} catch (err) {
-			console.error('Failed to add to queue:', err)
-		}
-	}
 
 	// Get highest quality thumbnail
 	const getThumbnail = (thumbnails?: Array<{ url: string; width?: number; height?: number }>) => {
@@ -165,18 +156,10 @@
 								<button
 									onclick={() => playVideo(result.videoId!)}
 									disabled={!player.isConnected}
-									class="p-2 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									class="p-3 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-primary/5"
 									title={player.isConnected ? "Play now" : "Connect to YTM Desktop to play"}
 								>
-									<Icon type="play" class="w-5 h-5 text-primary" />
-								</button>
-								<button
-									onclick={() => addToQueue(result.videoId!)}
-									disabled={!player.isConnected}
-									class="p-2 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-									title={player.isConnected ? "Add to queue" : "Connect to YTM Desktop to add to queue"}
-								>
-									<Icon type="plus" class="w-5 h-5 text-primary" />
+									<Icon type="play" class="w-6 h-6 text-primary" />
 								</button>
 							{/if}
 						</div>
