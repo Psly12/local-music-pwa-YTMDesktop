@@ -28,7 +28,7 @@ const config: Config = {
 					'img-src': ['self', 'blob:', 'data:', 'https:', 'https://snaeplayer.goatcounter.com/count', 'https://lh3.googleusercontent.com', 'https://yt3.ggpht.com', 'https://i.ytimg.com'],
 					'media-src': ['self', 'blob:'],
 					'font-src': ['self'],
-					'connect-src': ['self', 'http://localhost:*', 'http://127.0.0.1:*','http://10.*:*', 'http://192.168.*:*', 'http://172.*:*'],
+					'connect-src': ['self', 'http://localhost:*', 'http://127.0.0.1:*', 'http://10.*:*', 'http://192.168.*:*', 'http://172.*:*'],
 					'form-action': ['none'],
 					'manifest-src': ['self'],
 					'base-uri': ['none'],

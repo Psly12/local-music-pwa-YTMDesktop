@@ -22,6 +22,7 @@ class YTMStore {
 	private connected = $state(false)
 	private connecting = $state(false)
 	private error = $state<string | null>(null)
+	private loadingInitialData = false
 
 	constructor() {
 		const connection = this.client.getCurrentConnection()
@@ -114,7 +115,13 @@ class YTMStore {
 					await this.client.getPlayerState()
 					logger.ytm.info('Existing token is valid, connecting socket...')
 					logger.ytm.info('AUTO-CONNECT PATH: Token verification succeeded')
+					
+					// Set connected state immediately for UI feedback
+					this.connected = true
+					this.error = null
+					
 					await this.connectSocket()
+					await this.loadInitialData()
 					this.connecting = false
 					return true
 				} catch (tokenError) {
@@ -173,6 +180,11 @@ class YTMStore {
 			}
 
 			logger.ytm.info('Establishing enhanced socket connection...')
+			
+			// Set connected state immediately for UI feedback
+			this.connected = true
+			this.error = null
+			
 			await this.connectSocket()
 			await this.loadInitialData()
 
@@ -198,9 +210,13 @@ class YTMStore {
 				if (!connected) {
 					this.error = 'Lost connection to YouTube Music Desktop'
 				} else {
-					// When socket connects, load playlists and wait for state updates
-					logger.ytm.info('Socket connected, loading initial data...')
-					this.loadInitialData()
+					// When socket connects, only load initial data if not already loaded/loading
+					if (!this.loadingInitialData && this.playlists.length === 0) {
+						logger.ytm.info('Socket connected, loading initial data...')
+						this.loadInitialData()
+					} else {
+						logger.ytm.info('Socket connected, initial data already loaded/loading')
+					}
 				}
 			}
 		)
@@ -210,6 +226,14 @@ class YTMStore {
 	}
 
 	private async loadInitialData(): Promise<void> {
+		// Prevent duplicate loading
+		if (this.loadingInitialData) {
+			console.log('[YTM Store] Initial data loading already in progress, skipping...')
+			return
+		}
+
+		this.loadingInitialData = true
+		
 		try {
 			console.log('[YTM Store] Loading initial data...')
 			// Only load playlists via REST API, state will come via socket
@@ -222,7 +246,16 @@ class YTMStore {
 			console.log('[YTM Store] Initial data loaded, waiting for state updates via socket...')
 		} catch (error) {
 			console.error('[YTM Store] Failed to load initial data:', error)
-			this.error = error instanceof Error ? error.message : 'Failed to load data'
+			
+			// Handle rate limiting more gracefully
+			if (error instanceof Error && error.message.includes('429')) {
+				console.warn('[YTM Store] Rate limited, will retry playlists later...')
+				this.error = null // Don't show error to user for rate limits
+			} else {
+				this.error = error instanceof Error ? error.message : 'Failed to load data'
+			}
+		} finally {
+			this.loadingInitialData = false
 		}
 	}
 
@@ -231,6 +264,7 @@ class YTMStore {
 		this.connected = false
 		this.playerState = null
 		this.playlists = []
+		this.loadingInitialData = false
 	}
 
 	resetConnection(): void {
@@ -241,6 +275,7 @@ class YTMStore {
 		this.error = null
 		this.playerState = null
 		this.playlists = []
+		this.loadingInitialData = false
 	}
 
 	async forceReconnect(): Promise<boolean> {

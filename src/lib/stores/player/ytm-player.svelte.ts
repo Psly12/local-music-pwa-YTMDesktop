@@ -280,7 +280,7 @@ export class YTMPlayerStore {
 		return ytmStore.state?.video?.likeStatus === 2
 	}
 
-	// Auto-connect on startup
+	// Auto-connect on startup - only restore existing valid connections
 	private async autoConnect(): Promise<void> {
 		console.log('[YTMPlayer] Starting auto-connect...')
 		// Check if there's an existing connection stored
@@ -288,28 +288,22 @@ export class YTMPlayerStore {
 		
 		console.log('[YTMPlayer] Checking existing connection:', existingConnection)
 		
-		if (existingConnection?.token) {
-			console.log('[YTMPlayer] Found existing token, attempting reconnect...')
-			// Try to reconnect with existing credentials
-			await ytmStore.connect(existingConnection.host, existingConnection.port)
-		} else {
-			console.log('[YTMPlayer] No existing token, checking localStorage for saved settings...')
-			
-			// Get saved connection settings from localStorage (same as YTMConnectionSetup)
-			const savedHost = localStorage.getItem('ytm-host')
-			const savedPort = localStorage.getItem('ytm-port')
-			const savedEnabled = localStorage.getItem('ytm-enabled')
-			
-			if (savedEnabled === 'true' && savedHost) {
-				const host = savedHost
-				const port = savedPort ? parseInt(savedPort, 10) || 9863 : 9863
-				console.log('[YTMPlayer] Using saved settings from localStorage:', { host, port })
-				await ytmStore.connect(host, port)
-			} else {
-				console.log('[YTMPlayer] No saved settings, trying default connection...')
-				// Try to connect to default YTM Desktop instance
-				await ytmStore.connect('127.0.0.1', 9863)
+		if (existingConnection?.token && ytmStore.isTokenValid()) {
+			console.log('[YTMPlayer] Found valid existing token, attempting silent reconnect...')
+			try {
+				// Use the store's connect method which will handle the auto-reconnect path
+				const success = await ytmStore.connect(existingConnection.host, existingConnection.port)
+				if (success) {
+					console.log('[YTMPlayer] Auto-reconnect successful')
+				} else {
+					console.warn('[YTMPlayer] Auto-reconnect failed')
+				}
+			} catch (error) {
+				console.warn('[YTMPlayer] Auto-reconnect error:', error)
 			}
+		} else {
+			console.log('[YTMPlayer] No valid token found - user must manually connect')
+			// Don't automatically attempt new auth flows - require explicit user action
 		}
 	}
 

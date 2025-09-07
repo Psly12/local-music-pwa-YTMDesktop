@@ -11,8 +11,24 @@
 
 	let { onConnectionChange }: Props = $props()
 
+	// Get default host from current URL
+	function getDefaultHost(): string {
+		if (typeof window !== 'undefined') {
+			const hostname = window.location.hostname
+			// Smart defaulting based on how the app is accessed:
+			// - localhost -> 127.0.0.1 (local development)
+			// - IP address -> same IP (server setup - YTM Desktop runs on server)
+			// - Domain name -> same domain (production setup)
+			if (hostname === 'localhost') {
+				return '127.0.0.1'
+			}
+			return hostname
+		}
+		return '127.0.0.1'
+	}
+
 	// Connection settings
-	let host = $state('127.0.0.1')
+	let host = $state(getDefaultHost())
 	let port = $state(9863)
 	let enableYTM = $state(false)
 	
@@ -36,6 +52,7 @@
 		
 		console.log('[YTMConnectionSetup] Loading from localStorage:', { savedHost, savedPort, savedEnableYTM })
 		
+		// Use saved host if available, otherwise keep the default from getDefaultHost()
 		if (savedHost) host = savedHost
 		if (savedPort) port = parseInt(savedPort, 10) || 9863
 		if (savedEnableYTM) enableYTM = savedEnableYTM === 'true'
@@ -60,13 +77,17 @@
 		const existing = ytmStore.getCurrentConnection()
 		if (existing) {
 			console.log('[YTMConnectionSetup] Found existing connection:', existing)
-			// Only update if we don't have localStorage values
-			if (host === '127.0.0.1' && port === 9863) {
+			// Only update if we don't have localStorage values and host/port are still default
+			const defaultHost = getDefaultHost()
+			if ((host === defaultHost || host === '127.0.0.1') && port === 9863) {
 				host = existing.host
 				port = existing.port
 			}
 			enableYTM = true
 		}
+		
+		// Trigger immediate connection change callback to update UI
+		onConnectionChange?.(ytmStore.isConnected)
 	})
 
 	$effect(() => {
