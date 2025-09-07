@@ -20,15 +20,28 @@ function getHighestQualityThumbnail(thumbnails?: Array<{ url: string; width?: nu
 
 export class YTMPlayerStore {
 	#volume = $state(100)
+	#volumeBeforeMute = $state(100) // Store volume before muting for restoration
 	#shuffleState = $state(false) // Track shuffle state client-side since API doesn't provide it
 	#currentTrackWithColor = $state<YTMTrack | null>(null) // Cache current track with extracted color
 	#muted = $state(false) // Track mute state client-side
 
 	get volume() {
-		return this.#volume
+		// When muted, display volume as 0
+		return this.#muted ? 0 : this.#volume
 	}
 
 	set volume(value: number) {
+		// Auto-unmute when slider is moved and volume > 0
+		if (this.#muted && value > 0) {
+			this.#muted = false
+			// Send unmute command to YTM
+			if (ytmStore.isConnected) {
+				ytmStore.unmute().catch(error => {
+					console.warn('Failed to unmute:', error)
+				})
+			}
+		}
+		
 		this.#volume = value
 		// Sync with YTM
 		if (ytmStore.isConnected) {
@@ -274,6 +287,34 @@ export class YTMPlayerStore {
 		this.volume = volume
 	}
 
+	volumeUp = async (increment = 10): Promise<void> => {
+		if (this.#muted) {
+			// Volume up while muted: unmute and increase from zero
+			this.#muted = false
+			// Send unmute command to YTM
+			if (ytmStore.isConnected) {
+				ytmStore.unmute().catch(error => {
+					console.warn('Failed to unmute:', error)
+				})
+			}
+			// Increase from zero
+			this.volume = Math.min(increment, 100)
+		} else {
+			// Normal volume increase
+			this.volume = Math.min(this.#volume + increment, 100)
+		}
+	}
+
+	volumeDown = async (decrement = 10): Promise<void> => {
+		if (this.#muted) {
+			// Volume down while muted: toggle mute (unmute to restore volume)
+			await this.toggleMute()
+		} else {
+			// Normal volume decrease
+			this.volume = Math.max(this.#volume - decrement, 0)
+		}
+	}
+
 	toggleMute = async (): Promise<void> => {
 		if (!ytmStore.isConnected) {
 			console.warn('Not connected to YouTube Music Desktop')
@@ -282,9 +323,18 @@ export class YTMPlayerStore {
 
 		// Toggle mute state
 		if (this.#muted) {
+			// Unmute: restore previous volume
 			await ytmStore.unmute()
 			this.#muted = false
+			// Restore previous volume
+			this.#volume = this.#volumeBeforeMute
+			// Sync with YTM
+			ytmStore.setVolume(this.#volume).catch(error => {
+				console.warn('Failed to restore volume:', error)
+			})
 		} else {
+			// Mute: store current volume
+			this.#volumeBeforeMute = this.#volume
 			await ytmStore.mute()
 			this.#muted = true
 		}
