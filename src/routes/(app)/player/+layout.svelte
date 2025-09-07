@@ -16,6 +16,7 @@
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import YTMSearchComponent from '$lib/components/player/YTMSearchComponent.svelte'
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import { useMainStore } from '$lib/stores/main/use-store.ts'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
@@ -31,8 +32,8 @@
 	const isCompactVertical = $derived(sizes.isCompactVertical)
 	const layoutMode = $derived(data.layoutMode(sizes.isCompact, page.url.pathname))
 
-	// Tab state for queue/playlists
-	let activeTab = $state<'queue' | 'playlists'>('queue')
+	// Tab state for queue/playlists/search
+	let activeTab = $state<'queue' | 'playlists' | 'search'>('queue')
 
 	// Use actual YTM playlists instead of API endpoint
 	const playlists = $derived(player.userPlaylists)
@@ -84,12 +85,20 @@
 		const minSwipeDistance = 80
 
 		if (Math.abs(swipeDistance) > minSwipeDistance) {
-			if (swipeDistance > 0 && activeTab === 'queue') {
-				// Swipe left: Queue -> Playlists
-				activeTab = 'playlists'
-			} else if (swipeDistance < 0 && activeTab === 'playlists') {
-				// Swipe right: Playlists -> Queue
-				activeTab = 'queue'
+			if (swipeDistance > 0) {
+				// Swipe left: advance to next tab
+				if (activeTab === 'queue') {
+					activeTab = 'playlists'
+				} else if (activeTab === 'playlists') {
+					activeTab = 'search'
+				}
+			} else if (swipeDistance < 0) {
+				// Swipe right: go back to previous tab
+				if (activeTab === 'search') {
+					activeTab = 'playlists'
+				} else if (activeTab === 'playlists') {
+					activeTab = 'queue'
+				}
 			}
 		}
 	}
@@ -224,6 +233,12 @@
 			>
 				Playlists ({playlists.length})
 			</button>
+			<button 
+				class="flex-1 py-4 sm:py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl touch-manipulation min-h-12 sm:min-h-auto {activeTab === 'search' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
+				onclick={() => activeTab = 'search'}
+			>
+				Search
+			</button>
 		</div>
 
 		<div 
@@ -349,6 +364,11 @@
 							</button>
 						{/each}
 					{/if}
+				</div>
+			{:else if activeTab === 'search'}
+				<!-- Search Tab Content -->
+				<div class="w-full h-full">
+					<YTMSearchComponent />
 				</div>
 			{/if}
 		</div>

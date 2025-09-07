@@ -24,7 +24,15 @@
       "Bash(pnpm:*)",
       "Bash(timeout 10 pnpm run preview:host)",
       "Bash(echo $NODE_ENV)",
-      "Bash(NODE_ENV=production pnpm run build)"
+      "Bash(NODE_ENV=production pnpm run build)",
+      "Bash(npm:*)",
+      "Bash(sudo chown:*)",
+      "Bash(NPM_CONFIG_CACHE=/tmp/npm-cache npm install)",
+      "Bash(NPM_CONFIG_CACHE=/tmp/npm-cache npm run dev)",
+      "Bash(kill:*)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(NPM_CONFIG_CACHE=/tmp/npm-cache npm install youtube-search-api)"
     ],
     "deny": [],
     "ask": []

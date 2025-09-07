@@ -98,6 +98,27 @@ export interface YTMPlaylist {
 	author?: string
 }
 
+export interface YTMSearchResult {
+	type: 'video' | 'playlist' | 'channel'
+	videoId?: string
+	playlistId?: string
+	title: string
+	artist?: string
+	duration?: string
+	thumbnails?: Array<{
+		url: string
+		width?: number
+		height?: number
+	}>
+	isLive?: boolean
+	viewCount?: string
+}
+
+export interface YTMSearchResponse {
+	results: YTMSearchResult[]
+	continuation?: string
+}
+
 export interface YTMCommandData {
 	// Common command data types
 	playlistId?: string

@@ -1,5 +1,5 @@
 import { YTMAPIClient } from './client.js'
-import type { YTMPlayerState, YTMPlaylist, YTMConnection, YTMTrack } from './types.js'
+import type { YTMPlayerState, YTMPlaylist, YTMConnection, YTMTrack, YTMSearchResponse } from './types.js'
 import { logger } from '$lib/helpers/logger.ts'
 
 // Utility function to get the highest quality thumbnail from YTM thumbnails array
@@ -392,6 +392,60 @@ class YTMStore {
 			tokenValid: this.isTokenValid(),
 			expiryTime,
 			timeUntilExpiry: expiryTime ? expiryTime - Date.now() : null
+		}
+	}
+
+	async searchVideos(query: string): Promise<YTMSearchResponse | null> {
+		try {
+			console.log(`[YTM Store] Searching YouTube for: ${query}`)
+			
+			// Use our server-side YouTube search API
+			const response = await fetch(`/api/youtube-search?q=${encodeURIComponent(query)}&limit=20`)
+			
+			if (!response.ok) {
+				throw new Error(`YouTube search failed: ${response.status} ${response.statusText}`)
+			}
+			
+			const data = await response.json()
+			console.log('[YTM Store] YouTube search response:', data)
+			
+			return data as YTMSearchResponse
+		} catch (error) {
+			console.error('[YTM Store] YouTube search failed:', error)
+			return null
+		}
+	}
+
+	async playVideoById(videoId: string): Promise<void> {
+		if (!this.connected) {
+			console.warn('[YTM Store] Cannot play video - not connected')
+			return
+		}
+		
+		try {
+			console.log(`[YTM Store] Playing video: ${videoId}`)
+			await this.client.sendCommand('changeVideo', { videoId })
+			console.log('[YTM Store] Video playback initiated')
+		} catch (error) {
+			console.error('[YTM Store] Failed to play video:', error)
+		}
+	}
+
+	async addVideoToQueue(videoId: string, position?: number): Promise<void> {
+		if (!this.connected) {
+			console.warn('[YTM Store] Cannot add to queue - not connected')
+			return
+		}
+		
+		try {
+			console.log(`[YTM Store] Adding video to queue: ${videoId}`, position ? `at position ${position}` : '')
+			const commandData = position !== undefined 
+				? { videoId, position }
+				: { videoId }
+			await this.client.sendCommand('addSongToQueue', commandData)
+			console.log('[YTM Store] Video added to queue successfully')
+		} catch (error) {
+			console.error('[YTM Store] Failed to add video to queue:', error)
 		}
 	}
 }

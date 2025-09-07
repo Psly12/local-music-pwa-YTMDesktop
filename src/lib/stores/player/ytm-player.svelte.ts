@@ -1,6 +1,6 @@
 import { formatArtists } from '$lib/helpers/utils/text.ts'
 import { ytmStore } from '$lib/services/ytm-api'
-import type { YTMTrack, YTMPlaylist } from '$lib/services/ytm-api'
+import type { YTMTrack, YTMPlaylist, YTMSearchResponse } from '$lib/services/ytm-api'
 import { extractColorFromImageUrl } from '$lib/helpers/extract-artwork-color.ts'
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
@@ -427,5 +427,18 @@ export class YTMPlayerStore {
 
 	reset = (): void => {
 		// Nothing to reset for YTM player
+	}
+
+	// Search and video playback functionality
+	async searchVideos(query: string): Promise<YTMSearchResponse | null> {
+		return await ytmStore.searchVideos(query)
+	}
+
+	async playVideoById(videoId: string): Promise<void> {
+		await ytmStore.playVideoById(videoId)
+	}
+
+	async addVideoToQueue(videoId: string, position?: number): Promise<void> {
+		await ytmStore.addVideoToQueue(videoId, position)
 	}
 }
