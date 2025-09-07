@@ -14,6 +14,9 @@
 	let seekingValue = $state(0)
 
 	const value = $derived.by(() => {
+		// Don't update the slider value while user is actively seeking
+		if (seeking) return seekingValue
+		
 		const v = (player.currentTime / player.duration) * max
 
 		return Number.isFinite(v) ? v : 0
@@ -27,7 +30,7 @@
 
 	const currentTime = () => formatDuration(seeking ? getTime(seekingValue) : player.currentTime)
 
-	const getSliderValue = () => (seeking ? seekingValue : value)
+	const getSliderValue = () => value
 	const setSliderValue = (val: number) => {
 		if (seeking) {
 			seekingValue = val
@@ -59,9 +62,12 @@
 			seeking = true
 		}}
 		onSeekEnd={() => {
-			seeking = false
-
 			playerSeek(seekingValue)
+			
+			// Add small delay before allowing reactive updates to prevent bouncing
+			setTimeout(() => {
+				seeking = false
+			}, 100)
 		}}
 		class="touch-manipulation py-2 sm:py-1"
 	/>

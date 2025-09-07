@@ -24,6 +24,8 @@ export class YTMPlayerStore {
 	#shuffleState = $state(false) // Track shuffle state client-side since API doesn't provide it
 	#currentTrackWithColor = $state<YTMTrack | null>(null) // Cache current track with extracted color
 	#muted = $state(false) // Track mute state client-side
+	#seeking = $state(false) // Track if we're currently seeking to prevent play state flickering
+	#lastStablePlayingState = $state(false) // Store last stable playing state during seeks
 
 	get volume() {
 		// When muted, display volume as 0
@@ -61,7 +63,14 @@ export class YTMPlayerStore {
 
 	// YTM-derived properties
 	get playing(): boolean {
-		return ytmStore.state?.player?.trackState === 1
+		const currentPlaying = ytmStore.state?.player?.trackState === 1
+		
+		// If we're seeking, return the last stable state to prevent flickering
+		if (this.#seeking) {
+			return this.#lastStablePlayingState
+		}
+		
+		return currentPlaying
 	}
 
 	get currentTime(): number {
@@ -174,6 +183,14 @@ export class YTMPlayerStore {
 		// Auto-connect to YTM Desktop on startup
 		this.autoConnect()
 
+		// Track playing state changes to store stable state when not seeking
+		$effect(() => {
+			const currentPlaying = ytmStore.state?.player?.trackState === 1
+			if (!this.#seeking) {
+				this.#lastStablePlayingState = currentPlaying
+			}
+		})
+
 		// Set up Media Session API
 		const ms = window.navigator.mediaSession
 
@@ -262,7 +279,22 @@ export class YTMPlayerStore {
 
 	seek = async (time: number): Promise<void> => {
 		if (!ytmStore.isConnected) return
-		await ytmStore.seek(time)
+		
+		// Store current stable state before seeking
+		this.#lastStablePlayingState = ytmStore.state?.player?.trackState === 1
+		this.#seeking = true
+		
+		try {
+			await ytmStore.seek(time)
+			
+			// Clear seeking state after a brief delay to allow YTM to stabilize
+			setTimeout(() => {
+				this.#seeking = false
+			}, 300)
+		} catch (error) {
+			this.#seeking = false
+			throw error
+		}
 	}
 
 	playTrackAtIndex = async (index: number): Promise<void> => {
