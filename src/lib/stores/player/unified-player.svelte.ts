@@ -113,42 +113,42 @@ export class UnifiedPlayerStore {
 	}
 
 	// Player control methods
-	async togglePlay(force?: boolean): Promise<void> {
+	togglePlay(force?: boolean): Promise<void> {
 		if (this._mode === 'ytm') {
 			return this.ytmPlayer.togglePlay(force)
 		}
 		return this.localPlayer.togglePlay(force)
 	}
 
-	async playNext(): Promise<void> {
+	playNext(): Promise<void> {
 		if (this._mode === 'ytm') {
 			return this.ytmPlayer.playNext()
 		}
 		return this.localPlayer.playNext()
 	}
 
-	async playPrev(): Promise<void> {
+	playPrev(): Promise<void> {
 		if (this._mode === 'ytm') {
 			return this.ytmPlayer.playPrev()
 		}
 		return this.localPlayer.playPrev()
 	}
 
-	async seek(time: number): Promise<void> {
+	seek(time: number): Promise<void> {
 		if (this._mode === 'ytm') {
 			return this.ytmPlayer.seek(time)
 		}
 		return this.localPlayer.seek(time)
 	}
 
-	async toggleRepeat(): Promise<void> {
+	toggleRepeat(): Promise<void> {
 		if (this._mode === 'ytm') {
 			return this.ytmPlayer.toggleRepeat()
 		}
 		return this.localPlayer.toggleRepeat()
 	}
 
-	async toggleShuffle(): Promise<void> {
+	toggleShuffle(): Promise<void> {
 		if (this._mode === 'ytm') {
 			return this.ytmPlayer.toggleShuffle()
 		}
@@ -163,7 +163,7 @@ export class UnifiedPlayerStore {
 			)
 			return
 		}
-		return this.localPlayer.playTrack(trackIndex, queue, options ?? {})
+		this.localPlayer.playTrack(trackIndex, queue, options ?? {})
 	}
 
 	addToQueue(trackId: number | number[]): void {
@@ -173,7 +173,7 @@ export class UnifiedPlayerStore {
 			)
 			return
 		}
-		return this.localPlayer.addToQueue(trackId)
+		this.localPlayer.addToQueue(trackId)
 	}
 
 	clearQueue(): void {
@@ -183,7 +183,7 @@ export class UnifiedPlayerStore {
 			)
 			return
 		}
-		return this.localPlayer.clearQueue()
+		this.localPlayer.clearQueue()
 	}
 
 	reset(): void {

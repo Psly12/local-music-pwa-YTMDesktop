@@ -164,7 +164,7 @@ export class YTMAPIClient {
 		return response.token
 	}
 
-	async getPlayerState(): Promise<YTMPlayerState | null> {
+	getPlayerState(): Promise<YTMPlayerState | null> {
 		if (!this.connection?.token) {
 			throw new Error('Not authenticated')
 		}
@@ -177,7 +177,7 @@ export class YTMAPIClient {
 		)
 	}
 
-	async getPlaylists(): Promise<YTMPlaylist[]> {
+	getPlaylists(): Promise<YTMPlaylist[]> {
 		if (!this.connection?.token) {
 			throw new Error('Not authenticated')
 		}
@@ -257,7 +257,7 @@ export class YTMAPIClient {
 
 			// Auto-reconnect for certain disconnect reasons
 			if (reason === 'io server disconnect' || reason === 'transport close') {
-				this.attemptReconnect()
+				void this.attemptReconnect()
 			}
 		})
 
@@ -376,11 +376,14 @@ export class YTMAPIClient {
 		}
 	}
 
-	private handleConnectionError(error: any): void {
+	private handleConnectionError(error: unknown): void {
 		console.error('[YTM Client] Connection error:', error)
 
 		// Handle specific error types
-		if (error.message?.includes('unauthorized') || error.message?.includes('forbidden')) {
+		if (
+			error instanceof Error &&
+			(error.message?.includes('unauthorized') || error.message?.includes('forbidden'))
+		) {
 			console.warn('[YTM Client] Authentication error, clearing token')
 			this.clearConnection()
 		}
@@ -390,7 +393,7 @@ export class YTMAPIClient {
 		// Health check every 5 minutes
 		this.healthCheckInterval = setInterval(
 			() => {
-				this.performHealthCheck()
+				void this.performHealthCheck()
 			},
 			5 * 60 * 1000,
 		)

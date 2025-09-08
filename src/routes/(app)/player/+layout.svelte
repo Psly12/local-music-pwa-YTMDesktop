@@ -14,7 +14,7 @@
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
-	import YTMSearchComponent from '$lib/components/player/YTMSearchComponent.svelte'
+	import YTMSearchComponent from '$lib/components/player/YtmSearchComponent.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { formatArtists } from '$lib/helpers/utils/text.ts'

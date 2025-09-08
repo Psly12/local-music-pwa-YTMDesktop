@@ -21,7 +21,7 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 	try {
 		// Try with crossOrigin first, fallback without if CORS fails
 		let img = new Image()
-		let _corsEnabled = true
+		let corsEnabled = true
 
 		try {
 			img.crossOrigin = 'anonymous'
@@ -43,7 +43,7 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 				img.src = imageUrl
 			})
 		} catch (_corsError) {
-			_corsEnabled = false
+			corsEnabled = false
 			img = new Image()
 
 			await new Promise<void>((resolve, reject) => {

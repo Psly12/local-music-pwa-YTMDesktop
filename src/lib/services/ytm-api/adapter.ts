@@ -13,7 +13,7 @@ export function adaptYTMTrackToTrack(ytmTrack: YTMTrack): Track {
 		genre: [],
 		trackNo: 0,
 		trackOf: 0,
-		file: null, // YTM tracks don't have local files
+		file: undefined, // YTM tracks don't have local files
 		scannedAt: Date.now(),
 		fileName: ytmTrack.title,
 		directory: -2, // Special ID for YTM tracks

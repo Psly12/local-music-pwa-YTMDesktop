@@ -251,7 +251,7 @@ class YTMStore {
 					// When socket connects, only load initial data if not already loaded/loading
 					if (!this.loadingInitialData && this.playlists.length === 0) {
 						logger.ytm.info('Socket connected, loading initial data...')
-						this.loadInitialData()
+						void this.loadInitialData()
 					} else {
 						logger.ytm.info('Socket connected, initial data already loaded/loading')
 					}
@@ -292,12 +292,13 @@ class YTMStore {
 		}
 	}
 
-	async disconnect(): Promise<void> {
+	disconnect(): Promise<void> {
 		this.client.disconnect()
 		this.connected = false
 		this.playerState = null
 		this.playlists = []
 		this.loadingInitialData = false
+		return Promise.resolve()
 	}
 
 	resetConnection(): void {

@@ -5,7 +5,7 @@
 	import Select from '$lib/components/Select.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Switch from '$lib/components/Switch.svelte'
-	import YTMConnectionSetup from '$lib/components/ytm-connection/YTMConnectionSetup.svelte'
+	import YTMConnectionSetup from '$lib/components/ytm-connection/YtmConnectionSetup.svelte'
 	import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'

@@ -20,6 +20,7 @@ export interface YTMTokenResponse {
 export interface YTMTrack {
 	title: string
 	artists: string[]
+	author?: string
 	album?: string
 	duration: number
 	thumbnail: string
@@ -48,7 +49,7 @@ export interface YTMPlayerState {
 				duration?: string
 				selected?: boolean
 				videoId: string
-				counterparts?: any[] | null
+				counterparts?: unknown[] | null
 			}>
 			automixItems?: Array<{
 				thumbnails?: Array<{
@@ -61,7 +62,7 @@ export interface YTMPlayerState {
 				duration?: string
 				selected?: boolean
 				videoId: string
-				counterparts?: any[] | null
+				counterparts?: unknown[] | null
 			}>
 			isGenerating?: boolean
 			isInfinite?: boolean

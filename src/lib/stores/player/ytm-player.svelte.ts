@@ -110,7 +110,7 @@ export class YTMPlayerStore {
 		}
 
 		// Otherwise, start color extraction in the background and return basic track for now
-		this.#extractColorForTrack(basicTrack)
+		void this.#extractColorForTrack(basicTrack)
 		return basicTrack
 	}
 
@@ -193,7 +193,7 @@ export class YTMPlayerStore {
 
 	constructor() {
 		// Auto-connect to YTM Desktop on startup
-		this.autoConnect()
+		void this.autoConnect()
 
 		// Track playing state changes to store stable state when not seeking
 		$effect(() => {
@@ -244,11 +244,11 @@ export class YTMPlayerStore {
 		setActionHandler('nexttrack', this.playNext)
 		setActionHandler('seekbackward', () => {
 			const newPosition = Math.max(this.currentTime - 10, 0)
-			this.seek(newPosition)
+			void this.seek(newPosition)
 		})
 		setActionHandler('seekforward', () => {
 			const newPosition = Math.min(this.currentTime + 10, this.duration)
-			this.seek(newPosition)
+			void this.seek(newPosition)
 		})
 
 		// Sync volume changes
@@ -462,7 +462,7 @@ export class YTMPlayerStore {
 		return ytmStore.connect(host, port)
 	}
 
-	async disconnect(): Promise<void> {
+	disconnect(): Promise<void> {
 		return ytmStore.disconnect()
 	}
 
@@ -470,7 +470,7 @@ export class YTMPlayerStore {
 		ytmStore.resetConnection()
 	}
 
-	async forceReconnect(): Promise<boolean> {
+	forceReconnect(): Promise<boolean> {
 		return ytmStore.forceReconnect()
 	}
 
