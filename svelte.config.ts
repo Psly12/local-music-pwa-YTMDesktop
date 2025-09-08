@@ -13,7 +13,7 @@ const config: Config = {
 			fallback: '200.html',
 		}),
 		serviceWorker: {
-			register: false,
+			register: true,
 		},
 		alias: {
 			$paraglide: './.generated/paraglide',
