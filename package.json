@@ -84,7 +84,7 @@
 			"prettier-plugin-sort-imports": "-"
 		},
 		"patchedDependencies": {
-			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch",
+			"@material/material-color-utilities": "patches/@material+material-color-utilities+0.3.0.patch",
 			"debug": "patches/debug.patch"
 		},
 		"onlyBuiltDependencies": [
