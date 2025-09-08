@@ -37,7 +37,6 @@
 	
 	// Debug: Track when values change
 	$effect(() => {
-		console.log('[YTMConnectionSetup] State values changed:', { host, port, enableYTM })
 	})
 	
 	// Saved connections
@@ -50,14 +49,10 @@
 		const savedPort = localStorage.getItem('ytm-port')
 		const savedEnableYTM = localStorage.getItem('ytm-enabled')
 		
-		console.log('[YTMConnectionSetup] Loading from localStorage:', { savedHost, savedPort, savedEnableYTM })
-		
 		// Use saved host if available, otherwise keep the default from getDefaultHost()
-		if (savedHost) host = savedHost
-		if (savedPort) port = Number.parseInt(savedPort, 10) || 9863
-		if (savedEnableYTM) enableYTM = savedEnableYTM === 'true'
-		
-		console.log('[YTMConnectionSetup] Set initial values:', { host, port, enableYTM })
+		if (savedHost) { host = savedHost }
+		if (savedPort) { port = Number.parseInt(savedPort, 10) || 9863 }
+		if (savedEnableYTM) { enableYTM = savedEnableYTM === 'true' }
 
 		// Persist changes
 		$effect(() => {
@@ -65,7 +60,6 @@
 				localStorage.setItem('ytm-host', host)
 				localStorage.setItem('ytm-port', port.toString())
 				localStorage.setItem('ytm-enabled', enableYTM.toString())
-				console.log('[YTMConnectionSetup] Persisted settings:', { host, port, enableYTM })
 			} catch (error) {
 				console.warn('Failed to persist YTM settings:', error)
 			}
@@ -76,7 +70,6 @@
 	$effect(() => {
 		const existing = ytmStore.getCurrentConnection()
 		if (existing) {
-			console.log('[YTMConnectionSetup] Found existing connection:', existing)
 			// Only update if we don't have localStorage values and host/port are still default
 			const defaultHost = getDefaultHost()
 			if ((host === defaultHost || host === '127.0.0.1') && port === 9863) {
@@ -99,16 +92,6 @@
 			await ytmStore.disconnect()
 			return
 		}
-
-		// Debug: Log current values before connecting
-		console.log('[YTMConnectionSetup] Connecting with values:', { host, port })
-		console.log('[YTMConnectionSetup] Raw host value:', JSON.stringify(host))
-		console.log('[YTMConnectionSetup] Raw port value:', JSON.stringify(port))
-		console.log('[YTMConnectionSetup] Store state before connect:', { 
-			isConnecting: ytmStore.isConnecting, 
-			isConnected: ytmStore.isConnected,
-			lastError: ytmStore.lastError 
-		})
 		
 		// Force a small delay to ensure any pending input events are processed
 		await new Promise(resolve => setTimeout(resolve, 10))
@@ -117,11 +100,6 @@
 		const hostInput = document.querySelector('input[name="ytm-host"]') as HTMLInputElement
 		const portInput = document.querySelector('input[name="ytm-port"]') as HTMLInputElement
 		
-		console.log('[YTMConnectionSetup] DOM input values:', { 
-			hostFromDOM: hostInput?.value, 
-			portFromDOM: portInput?.value 
-		})
-		
 		// Use DOM values if they differ from state (binding issue detection)
 		const formHostValue = hostInput?.value || host
 		const formPortValue = portInput?.value ? Number.parseInt(portInput.value, 10) : port
@@ -129,8 +107,6 @@
 		// Ensure we have the latest values from the form
 		const currentHost = (formHostValue || '').trim() || '127.0.0.1'
 		const currentPort = formPortValue || 9863
-		
-		console.log('[YTMConnectionSetup] After delay, using normalized values:', { currentHost, currentPort })
 
 		// Set local connecting state
 		localConnecting = true
@@ -140,13 +116,6 @@
 			
 			// Force a small delay to ensure UI has time to update
 			await new Promise(resolve => setTimeout(resolve, 100))
-			
-			console.log('[YTMConnectionSetup] Connection result:', { 
-				success,
-				isConnecting: ytmStore.isConnecting, 
-				isConnected: ytmStore.isConnected,
-				lastError: ytmStore.lastError 
-			})
 			
 			if (success) {
 				// Save this connection for future use

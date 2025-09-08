@@ -12,7 +12,6 @@ const manifest = {
 	background_color: THEME_PALLETTE_DARK.surface,
 	display: 'standalone',
 	display_override: ['window-controls-overlay', 'standalone'],
-	orientation: 'any',
 	description: 'Lightweight on device music player right in your browser.',
 	categories: ['music', 'entertainment'],
 	launch_handler: {

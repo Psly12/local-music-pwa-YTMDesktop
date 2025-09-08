@@ -16,7 +16,7 @@ import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 
 	const value = $derived.by(() => {
 		// Don't update the slider value while user is actively seeking
-		if (seeking) return seekingValue
+		if (seeking) { return seekingValue }
 		
 		const v = (player.currentTime / player.duration) * max
 

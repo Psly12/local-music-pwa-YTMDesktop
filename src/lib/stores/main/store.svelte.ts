@@ -2,7 +2,6 @@ import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
 import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
-import { isMobile } from '$lib/helpers/utils/ua.ts'
 import type { UpdatePlaylistOptions } from '$lib/library/playlists-actions'
 import type { LibraryStoreName } from '$lib/library/types'
 

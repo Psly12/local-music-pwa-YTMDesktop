@@ -35,7 +35,8 @@
       "Bash(NPM_CONFIG_CACHE=/tmp/npm-cache npm install youtube-search-api)",
       "Bash(dir:*)",
       "Bash(NODE_ENV=production npm run build)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": [],
     "ask": []

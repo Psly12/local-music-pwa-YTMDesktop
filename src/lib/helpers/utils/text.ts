@@ -9,7 +9,9 @@ export const truncate = (text: string, length: number): string => {
 }
 
 export const formatArtists = (artists?: readonly StringOrUnknownItem[]): string => {
-	if (!artists) return ''
+	if (!artists) {
+		return ''
+	}
 	return artists.filter((artist) => artist !== UNKNOWN_ITEM).join(', ')
 }
 

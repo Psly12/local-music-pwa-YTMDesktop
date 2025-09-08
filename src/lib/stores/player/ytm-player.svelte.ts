@@ -1,5 +1,4 @@
 import { extractColorFromImageUrl } from '$lib/helpers/extract-artwork-color.ts'
-import { formatArtists } from '$lib/helpers/utils/text.ts'
 import type { YTMPlaylist, YTMSearchResponse, YTMTrack } from '$lib/services/ytm-api'
 import { ytmStore } from '$lib/services/ytm-api'
 
@@ -9,7 +8,9 @@ export type PlayerRepeat = 'none' | 'one' | 'all'
 function getHighestQualityThumbnail(
 	thumbnails?: Array<{ url: string; width?: number; height?: number }>,
 ): string {
-	if (!thumbnails || thumbnails.length === 0) return ''
+	if (!thumbnails || thumbnails.length === 0) {
+		return ''
+	}
 
 	const highestQuality = thumbnails.reduce((best, current) => {
 		const bestSize = (best.width || 0) * (best.height || 0)
@@ -85,7 +86,9 @@ export class YTMPlayerStore {
 
 	get activeTrack(): YTMTrack | null {
 		const state = ytmStore.state
-		if (!state?.video) return null
+		if (!state?.video) {
+			return null
+		}
 
 		const thumbnailUrl = getHighestQualityThumbnail(state.video.thumbnails)
 		const basicTrack: YTMTrack = {
@@ -112,7 +115,9 @@ export class YTMPlayerStore {
 	}
 
 	async #extractColorForTrack(track: YTMTrack): Promise<void> {
-		if (!track.thumbnail) return
+		if (!track.thumbnail) {
+			return
+		}
 
 		try {
 			const primaryColor = await extractColorFromImageUrl(track.thumbnail)
@@ -187,7 +192,6 @@ export class YTMPlayerStore {
 	}
 
 	constructor() {
-		console.log('[YTMPlayer] Initializing YTM Player Store...')
 		// Auto-connect to YTM Desktop on startup
 		this.autoConnect()
 
@@ -278,17 +282,23 @@ export class YTMPlayerStore {
 	}
 
 	playNext = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.next()
 	}
 
 	playPrev = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.previous()
 	}
 
 	seek = async (time: number): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 
 		// Store current stable state before seeking
 		this.#lastStablePlayingState = ytmStore.state?.player?.trackState === 1
@@ -308,17 +318,23 @@ export class YTMPlayerStore {
 	}
 
 	playTrackAtIndex = async (index: number): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.playTrackAtIndex(index)
 	}
 
 	toggleRepeat = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.toggleRepeat()
 	}
 
 	toggleShuffle = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		// Toggle client-side state first for immediate UI feedback
 		this.#shuffleState = !this.#shuffleState
 		// Then send command to YTM
@@ -383,24 +399,32 @@ export class YTMPlayerStore {
 	}
 
 	mute = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.mute()
 		this.#muted = true
 	}
 
 	unmute = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.unmute()
 		this.#muted = false
 	}
 
 	likeTrack = async (): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.likeTrack()
 	}
 
 	loadPlaylist = async (playlistId: string): Promise<void> => {
-		if (!ytmStore.isConnected) return
+		if (!ytmStore.isConnected) {
+			return
+		}
 		await ytmStore.loadPlaylist(playlistId)
 	}
 
@@ -411,14 +435,10 @@ export class YTMPlayerStore {
 
 	// Auto-connect on startup - only restore existing valid connections
 	private async autoConnect(): Promise<void> {
-		console.log('[YTMPlayer] Starting auto-connect...')
 		// Check if there's an existing connection stored
 		const existingConnection = ytmStore.getCurrentConnection()
 
-		console.log('[YTMPlayer] Checking existing connection:', existingConnection)
-
 		if (existingConnection?.token && ytmStore.isTokenValid()) {
-			console.log('[YTMPlayer] Found valid existing token, attempting silent reconnect...')
 			try {
 				// Use the store's connect method which will handle the auto-reconnect path
 				const success = await ytmStore.connect(
@@ -426,7 +446,6 @@ export class YTMPlayerStore {
 					existingConnection.port,
 				)
 				if (success) {
-					console.log('[YTMPlayer] Auto-reconnect successful')
 				} else {
 					console.warn('[YTMPlayer] Auto-reconnect failed')
 				}
@@ -434,7 +453,6 @@ export class YTMPlayerStore {
 				console.warn('[YTMPlayer] Auto-reconnect error:', error)
 			}
 		} else {
-			console.log('[YTMPlayer] No valid token found - user must manually connect')
 			// Don't automatically attempt new auth flows - require explicit user action
 		}
 	}

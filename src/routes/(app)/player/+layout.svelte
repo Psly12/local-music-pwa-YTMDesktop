@@ -40,7 +40,6 @@
 
 	// Function to load playlist via YTM
 	const loadPlaylist = async (playlistId: string) => {
-		console.log('Loading playlist:', playlistId)
 		if (!player.isConnected) {
 			console.warn('Not connected to YTM Desktop')
 			return
@@ -78,7 +77,7 @@
 	}
 
 	const handleTouchEnd = (e: TouchEvent) => {
-		if (isScrolling) return
+		if (isScrolling) { return }
 		
 		const touchEndX = e.changedTouches[0].clientX
 		const swipeDistance = touchStartX - touchEndX

@@ -50,7 +50,7 @@ export class YTMAPIClient {
 		}
 
 		if (this.connection?.token) {
-			headers['Authorization'] = this.connection.token
+			headers.Authorization = this.connection.token
 		}
 
 		try {
@@ -220,7 +220,6 @@ export class YTMAPIClient {
 		const httpProtocol = 'http'
 
 		const socketUrl = `${httpProtocol}://${this.connection.host}:${this.connection.port}/api/v1/realtime`
-		console.log('[YTM Client] Connecting socket to:', socketUrl)
 
 		this.onStateUpdate = onStateUpdate
 		this.onConnectionChange = onConnectionChange
@@ -239,7 +238,6 @@ export class YTMAPIClient {
 		})
 
 		this.socket.on('connect', () => {
-			console.log('[YTM Client] Socket connected successfully')
 			if (this.connection) {
 				this.connection.connected = true
 				this.saveConnection()
@@ -247,14 +245,10 @@ export class YTMAPIClient {
 			this.reconnectAttempts = 0
 			this.reconnectDelay = 1000 // Reset delay on successful connection
 			this.onConnectionChange?.(true)
-
-			// Request initial state via socket (doesn't count against rate limit)
-			console.log('[YTM Client] Requesting current state via socket...')
 			this.requestCurrentState()
 		})
 
 		this.socket.on('disconnect', (reason) => {
-			console.log('[YTM Client] Socket disconnected:', reason)
 			if (this.connection) {
 				this.connection.connected = false
 				this.saveConnection()
@@ -268,7 +262,6 @@ export class YTMAPIClient {
 		})
 
 		this.socket.on('state-update', (state: YTMPlayerState) => {
-			console.log('[YTM Client] Received state update via socket')
 			this.onStateUpdate?.(state)
 		})
 
@@ -278,11 +271,7 @@ export class YTMAPIClient {
 			this.handleConnectionError(error)
 		})
 
-		this.socket.on('reconnect_attempt', (attemptNumber) => {
-			console.log(
-				`[YTM Client] Reconnection attempt ${attemptNumber}/${this.maxReconnectAttempts}`,
-			)
-		})
+		this.socket.on('reconnect_attempt', (_attemptNumber) => {})
 
 		this.socket.on('reconnect_error', (error) => {
 			console.error('[YTM Client] Reconnection failed:', error)
@@ -296,7 +285,6 @@ export class YTMAPIClient {
 
 	requestCurrentState(): void {
 		if (this.socket?.connected) {
-			console.log('[YTM Client] Emitting state request via socket...')
 			this.socket.emit('get-state')
 		}
 	}
@@ -354,7 +342,6 @@ export class YTMAPIClient {
 	}
 
 	clearConnection(): void {
-		console.log('[YTM Client] Clearing stored connection...')
 		this.connection = null
 		this.tokenExpiryTime = null
 		localStorage.removeItem('ytm-connection')
@@ -374,10 +361,6 @@ export class YTMAPIClient {
 		this.reconnectAttempts++
 		const delay = Math.min(this.reconnectDelay * 2 ** (this.reconnectAttempts - 1), 10000)
 
-		console.log(
-			`[YTM Client] Attempting reconnection in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
-		)
-
 		await this.delay(delay)
 
 		if (this.connection?.token) {
@@ -385,7 +368,7 @@ export class YTMAPIClient {
 				// Test token validity before attempting socket reconnection
 				await this.getPlayerState()
 				this.connectSocket(this.onStateUpdate, this.onConnectionChange)
-			} catch (error) {
+			} catch (_error) {
 				console.warn('[YTM Client] Token invalid during reconnect, clearing connection')
 				this.clearConnection()
 				this.onConnectionChange?.(false)
@@ -421,7 +404,9 @@ export class YTMAPIClient {
 	}
 
 	private async performHealthCheck(): Promise<void> {
-		if (!this.connection?.token) return
+		if (!this.connection?.token) {
+			return
+		}
 
 		// Check if token is nearing expiry (within 1 hour)
 		if (this.tokenExpiryTime && Date.now() + 60 * 60 * 1000 >= this.tokenExpiryTime) {
@@ -434,7 +419,6 @@ export class YTMAPIClient {
 		// Test connection health
 		try {
 			await this.getPlayerState()
-			console.log('[YTM Client] Health check passed')
 		} catch (error) {
 			console.warn('[YTM Client] Health check failed:', error)
 			if (error.message?.includes('Authentication failed')) {
@@ -445,8 +429,12 @@ export class YTMAPIClient {
 	}
 
 	isTokenValid(): boolean {
-		if (!this.connection?.token) return false
-		if (!this.tokenExpiryTime) return true // Assume valid if no expiry set
+		if (!this.connection?.token) {
+			return false
+		}
+		if (!this.tokenExpiryTime) {
+			return true // Assume valid if no expiry set
+		}
 		return Date.now() < this.tokenExpiryTime
 	}
 

@@ -20,10 +20,14 @@ class Logger {
 	}
 
 	private shouldLog(level: LogLevel): boolean {
-		if (!this.isEnabled) return false
+		if (!this.isEnabled) {
+			return false
+		}
 
 		// Always log errors and warnings
-		if (level === 'error' || level === 'warn') return true
+		if (level === 'error' || level === 'warn') {
+			return true
+		}
 
 		// Only log info and debug in development
 		return this.isDevelopment

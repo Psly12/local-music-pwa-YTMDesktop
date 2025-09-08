@@ -8,7 +8,7 @@ type OptionalUnion<
 > = U extends unknown ? { [P in Exclude<A, keyof U>]?: never } & U : never
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
 type RouteId = '/api/playlists'
-type MaybeWithVoid<T> = {} extends T ? T | void : T
+type MaybeWithVoid<T> = {} extends T ? T | undefined : T
 type EnsureDefined<T> = T extends void ? {} : T
 type MatcherParam<M> = M extends (param: string) => param is infer U
 	? U extends string

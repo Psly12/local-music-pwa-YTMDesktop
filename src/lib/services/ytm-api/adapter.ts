@@ -1,9 +1,9 @@
-import type { Album, Artist, ParsedTrackData, Playlist, Track } from '$lib/library/types.ts'
+import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
 import type { YTMPlayerState, YTMPlaylist, YTMTrack } from './types.js'
 
 export function adaptYTMTrackToTrack(ytmTrack: YTMTrack): Track {
 	return {
-		id: Number.parseInt(ytmTrack.id) || Math.floor(Math.random() * 1000000),
+		id: Number.parseInt(ytmTrack.id, 10) || Math.floor(Math.random() * 1000000),
 		uuid: ytmTrack.id,
 		name: ytmTrack.title,
 		album: ytmTrack.album || '~\0unknown',
@@ -22,7 +22,7 @@ export function adaptYTMTrackToTrack(ytmTrack: YTMTrack): Track {
 
 export function adaptYTMPlaylistToPlaylist(ytmPlaylist: YTMPlaylist): Playlist {
 	return {
-		id: Number.parseInt(ytmPlaylist.id) || Math.floor(Math.random() * 1000000),
+		id: Number.parseInt(ytmPlaylist.id, 10) || Math.floor(Math.random() * 1000000),
 		uuid: ytmPlaylist.id,
 		name: ytmPlaylist.title,
 		description: `${ytmPlaylist.trackCount} tracks${ytmPlaylist.author ? ` • ${ytmPlaylist.author}` : ''}`,
@@ -34,7 +34,9 @@ export function extractAlbumsFromYTMTracks(tracks: YTMTrack[]): Album[] {
 	const albumsMap = new Map<string, Album>()
 
 	for (const track of tracks) {
-		if (!track.album) continue
+		if (!track.album) {
+			continue
+		}
 
 		const albumKey = `${track.album}-${track.author}`
 		if (!albumsMap.has(albumKey)) {

@@ -21,12 +21,10 @@ import { usePlayer } from '$lib/stores/player/use-store.ts'
 		error = null
 		
 		try {
-			console.log('Searching for:', searchQuery)
 			const response = await player.searchVideos(searchQuery.trim())
 			
 			if (response?.results) {
 				searchResults = response.results
-				console.log('Search results:', searchResults)
 			} else {
 				searchResults = []
 				error = 'No results found'
@@ -42,12 +40,12 @@ import { usePlayer } from '$lib/stores/player/use-store.ts'
 
 	const handleKeydown = (e: KeyboardEvent) => {
 		if (e.key === 'Enter') {
-			performSearch()
+			void performSearch()
 		}
 	}
 
 	const playVideo = async (videoId: string) => {
-		if (!videoId) return
+		if (!videoId) { return }
 		
 		try {
 			await player.playVideoById(videoId)
@@ -59,7 +57,7 @@ import { usePlayer } from '$lib/stores/player/use-store.ts'
 
 	// Get highest quality thumbnail
 	const getThumbnail = (thumbnails?: Array<{ url: string; width?: number; height?: number }>) => {
-		if (!thumbnails || thumbnails.length === 0) return ''
+		if (!thumbnails || thumbnails.length === 0) { return '' }
 		
 		const highest = thumbnails.reduce((best, current) => {
 			const bestSize = (best.width || 0) * (best.height || 0)

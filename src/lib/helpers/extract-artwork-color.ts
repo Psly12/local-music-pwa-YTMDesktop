@@ -9,7 +9,9 @@ const colorCache = new Map<string, number | undefined>()
  * Extract primary color from an image URL (for remote artwork like YTM thumbnails)
  */
 export async function extractColorFromImageUrl(imageUrl: string): Promise<number | undefined> {
-	if (!imageUrl) return undefined
+	if (!imageUrl) {
+		return undefined
+	}
 
 	// Check cache first
 	if (colorCache.has(imageUrl)) {
@@ -19,7 +21,7 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 	try {
 		// Try with crossOrigin first, fallback without if CORS fails
 		let img = new Image()
-		let corsEnabled = true
+		let _corsEnabled = true
 
 		try {
 			img.crossOrigin = 'anonymous'
@@ -40,10 +42,8 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 				}
 				img.src = imageUrl
 			})
-		} catch (corsError) {
-			// CORS failed, try without crossOrigin
-			console.log('CORS failed, trying without crossOrigin for:', imageUrl)
-			corsEnabled = false
+		} catch (_corsError) {
+			_corsEnabled = false
 			img = new Image()
 
 			await new Promise<void>((resolve, reject) => {
@@ -66,7 +66,9 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 		// Create canvas and draw image
 		const canvas = document.createElement('canvas')
 		const ctx = canvas.getContext('2d')
-		if (!ctx) throw new Error('Could not get canvas context')
+		if (!ctx) {
+			throw new Error('Could not get canvas context')
+		}
 
 		// Calculate dimensions maintaining aspect ratio
 		const aspectRatio = img.width / img.height
@@ -89,7 +91,7 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 		let imageData: ImageData
 		try {
 			imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-		} catch (securityError) {
+		} catch (_securityError) {
 			// Canvas is tainted due to CORS, cannot extract pixel data
 			console.warn('Canvas tainted, cannot extract color from:', imageUrl)
 			colorCache.set(imageUrl, undefined)

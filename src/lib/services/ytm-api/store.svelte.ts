@@ -12,7 +12,9 @@ import type {
 function getHighestQualityThumbnail(
 	thumbnails?: Array<{ url: string; width?: number; height?: number }>,
 ): string {
-	if (!thumbnails || thumbnails.length === 0) return ''
+	if (!thumbnails || thumbnails.length === 0) {
+		return ''
+	}
 
 	const highestQuality = thumbnails.reduce((best, current) => {
 		const bestSize = (best.width || 0) * (best.height || 0)
@@ -61,7 +63,9 @@ class YTMStore {
 
 	get currentTrack(): YTMTrack | null {
 		const state = this.playerState
-		if (!state?.video) return null
+		if (!state?.video) {
+			return null
+		}
 
 		return {
 			title: state.video.title,
@@ -99,7 +103,7 @@ class YTMStore {
 			// First, test if YTM Desktop is running by trying to reach the API
 			logger.ytm.debug('Testing if YTM Desktop is reachable...', { host, port })
 			logger.ytm.info('MANUAL CONNECT: About to make HEAD request to test reachability')
-			const testResponse = await fetch(`http://${host}:${port}/api/v1/state`, {
+			const _testResponse = await fetch(`http://${host}:${port}/api/v1/state`, {
 				method: 'HEAD',
 				mode: 'cors',
 			}).catch((e) => {
@@ -186,7 +190,7 @@ class YTMStore {
 
 				try {
 					logger.ytm.debug(`Attempting token exchange (${attempts}/${maxAttempts})...`)
-					const token = await this.client.exchangeToken(
+					const _token = await this.client.exchangeToken(
 						{
 							appId: 'localmusicpwa', // Must match the requestcode appId
 							code,
@@ -264,22 +268,15 @@ class YTMStore {
 	private async loadInitialData(): Promise<void> {
 		// Prevent duplicate loading
 		if (this.loadingInitialData) {
-			console.log('[YTM Store] Initial data loading already in progress, skipping...')
 			return
 		}
 
 		this.loadingInitialData = true
 
 		try {
-			console.log('[YTM Store] Loading initial data...')
 			// Only load playlists via REST API, state will come via socket
 			const playlists = await this.client.getPlaylists()
-
-			console.log('[YTM Store] Received playlists:', playlists)
 			this.playlists = playlists
-
-			// State will be updated via Socket.IO 'state-update' events
-			console.log('[YTM Store] Initial data loaded, waiting for state updates via socket...')
 		} catch (error) {
 			console.error('[YTM Store] Failed to load initial data:', error)
 
@@ -304,7 +301,6 @@ class YTMStore {
 	}
 
 	resetConnection(): void {
-		console.log('[YTM Store] Resetting connection...')
 		this.client.clearConnection()
 		this.connected = false
 		this.connecting = false
@@ -315,85 +311,107 @@ class YTMStore {
 	}
 
 	async forceReconnect(): Promise<boolean> {
-		console.log('[YTM Store] Force reconnecting...')
 		this.resetConnection()
 		// Try to reconnect to default
 		return await this.connect('127.0.0.1', 9863)
 	}
 
 	async play(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('playPause')
 	}
 
 	async pause(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('playPause')
 	}
 
 	async togglePlayPause(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('playPause')
 	}
 
 	async next(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('next')
 	}
 
 	async previous(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('previous')
 	}
 
 	async setVolume(volume: number): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('setVolume', volume)
 	}
 
 	async mute(): Promise<void> {
-		if (!this.connected) return
-		console.log('[YTM Store] Muting audio')
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('mute')
 	}
 
 	async unmute(): Promise<void> {
-		if (!this.connected) return
-		console.log('[YTM Store] Unmuting audio')
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('unmute')
 	}
 
 	async seek(position: number): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('seekTo', position)
 	}
 
 	async playTrackAtIndex(index: number): Promise<void> {
-		if (!this.connected) return
-		console.log(`[YTM Store] Playing track at index: ${index}`)
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('playQueueIndex', index)
 	}
 
 	async likeTrack(): Promise<void> {
-		if (!this.connected) return
-		console.log('[YTM Store] Toggling like for track')
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('toggleLike')
 	}
 
 	async loadPlaylist(playlistId: string): Promise<void> {
-		if (!this.connected) return
-		console.log(`[YTM Store] Loading playlist: ${playlistId}`)
+		if (!this.connected) {
+			return
+		}
 		// Use the correct YTM API command to load a playlist
 		await this.client.sendCommand('changeVideo', { playlistId })
 	}
 
 	async toggleShuffle(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		await this.client.sendCommand('shuffle')
 	}
 
 	async toggleRepeat(): Promise<void> {
-		if (!this.connected) return
+		if (!this.connected) {
+			return
+		}
 		// Based on working code, repeat cycles through modes 0,1,2
 		const currentMode = this.playerState?.player?.queue?.repeatMode || 0
 		const nextMode = (currentMode + 1) % 3
@@ -433,8 +451,6 @@ class YTMStore {
 
 	async searchVideos(query: string): Promise<YTMSearchResponse | null> {
 		try {
-			console.log(`[YTM Store] Searching YouTube for: ${query}`)
-
 			// Use our server-side YouTube search API
 			const response = await fetch(
 				`/api/youtube-search?q=${encodeURIComponent(query)}&limit=20`,
@@ -445,7 +461,6 @@ class YTMStore {
 			}
 
 			const data = await response.json()
-			console.log('[YTM Store] YouTube search response:', data)
 
 			return data as YTMSearchResponse
 		} catch (error) {
@@ -461,9 +476,7 @@ class YTMStore {
 		}
 
 		try {
-			console.log(`[YTM Store] Playing video: ${videoId}`)
 			await this.client.sendCommand('changeVideo', { videoId })
-			console.log('[YTM Store] Video playback initiated')
 		} catch (error) {
 			console.error('[YTM Store] Failed to play video:', error)
 		}
@@ -476,13 +489,8 @@ class YTMStore {
 		}
 
 		try {
-			console.log(
-				`[YTM Store] Adding video to queue: ${videoId}`,
-				position ? `at position ${position}` : '',
-			)
 			const commandData = position !== undefined ? { videoId, position } : { videoId }
 			await this.client.sendCommand('addSongToQueue', commandData)
-			console.log('[YTM Store] Video added to queue successfully')
 		} catch (error) {
 			console.error('[YTM Store] Failed to add video to queue:', error)
 		}
