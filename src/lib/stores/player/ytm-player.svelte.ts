@@ -341,11 +341,11 @@ export class YTMPlayerStore {
 		await ytmStore.toggleShuffle()
 	}
 
-	setVolume = async (volume: number): Promise<void> => {
+	setVolume = (volume: number): void => {
 		this.volume = volume
 	}
 
-	volumeUp = async (increment = 10): Promise<void> => {
+	volumeUp = (increment = 10): void => {
 		if (this.#muted) {
 			// Volume up while muted: unmute and increase from zero
 			this.#muted = false
@@ -458,7 +458,7 @@ export class YTMPlayerStore {
 	}
 
 	// Connection management
-	async connect(host = '127.0.0.1', port = 9863): Promise<boolean> {
+	connect(host = '127.0.0.1', port = 9863): Promise<boolean> {
 		return ytmStore.connect(host, port)
 	}
 
