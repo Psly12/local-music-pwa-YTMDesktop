@@ -1,7 +1,6 @@
 <script lang="ts">
-	
 	import type { ClassValue } from 'clsx'
-import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
+	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import Slider from '../Slider.svelte'
 
@@ -16,8 +15,10 @@ import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 
 	const value = $derived.by(() => {
 		// Don't update the slider value while user is actively seeking
-		if (seeking) { return seekingValue }
-		
+		if (seeking) {
+			return seekingValue
+		}
+
 		const v = (player.currentTime / player.duration) * max
 
 		return Number.isFinite(v) ? v : 0
@@ -64,7 +65,7 @@ import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 		}}
 		onSeekEnd={() => {
 			playerSeek(seekingValue)
-			
+
 			// Add small delay before allowing reactive updates to prevent bouncing
 			setTimeout(() => {
 				seeking = false

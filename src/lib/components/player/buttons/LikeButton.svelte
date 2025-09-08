@@ -10,9 +10,9 @@
 </script>
 
 <IconButton
-	tooltip={player.isLiked ? "Unlike" : "Like"}
+	tooltip={player.isLiked ? 'Unlike' : 'Like'}
 	class={className}
 	onclick={player.likeTrack}
 >
-	<Icon type={player.isLiked ? "favorite" : "favoriteOutline"} />
+	<Icon type={player.isLiked ? 'favorite' : 'favoriteOutline'} />
 </IconButton>

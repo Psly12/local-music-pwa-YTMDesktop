@@ -8,11 +8,22 @@
 	const player = usePlayer()
 
 	// Determine which volume icon to show based on mute state and volume level
-	function getVolumeIcon(muted: boolean, volume: number): 'volumeOff' | 'volumeLow' | 'volumeMid' | 'volumeHigh' {
-		if (muted) { return 'volumeOff' }
-		if (volume === 0) { return 'volumeOff' }
-		if (volume < 30) { return 'volumeLow' }
-		if (volume < 70) { return 'volumeMid' }
+	function getVolumeIcon(
+		muted: boolean,
+		volume: number,
+	): 'volumeOff' | 'volumeLow' | 'volumeMid' | 'volumeHigh' {
+		if (muted) {
+			return 'volumeOff'
+		}
+		if (volume === 0) {
+			return 'volumeOff'
+		}
+		if (volume < 30) {
+			return 'volumeLow'
+		}
+		if (volume < 70) {
+			return 'volumeMid'
+		}
 		return 'volumeHigh'
 	}
 
@@ -21,10 +32,6 @@
 	let tooltipText = $derived(player.muted ? 'Unmute' : 'Mute')
 </script>
 
-<IconButton
-	tooltip={tooltipText}
-	class={className}
-	onclick={player.toggleMute}
->
+<IconButton tooltip={tooltipText} class={className} onclick={player.toggleMute}>
 	<Icon type={volumeIcon} />
 </IconButton>

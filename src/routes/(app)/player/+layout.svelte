@@ -44,7 +44,7 @@
 			console.warn('Not connected to YTM Desktop')
 			return
 		}
-		
+
 		try {
 			// Send command to YTM to load playlist
 			await player.loadPlaylist(playlistId)
@@ -70,15 +70,17 @@
 		// Check if user is scrolling vertically more than horizontally
 		const deltaY = Math.abs(e.touches[0].clientY - touchStartY)
 		const deltaX = Math.abs(e.touches[0].clientX - touchStartX)
-		
+
 		if (deltaY > deltaX * 1.5) {
 			isScrolling = true
 		}
 	}
 
 	const handleTouchEnd = (e: TouchEvent) => {
-		if (isScrolling) { return }
-		
+		if (isScrolling) {
+			return
+		}
+
 		const touchEndX = e.changedTouches[0].clientX
 		const swipeDistance = touchStartX - touchEndX
 		const minSwipeDistance = 80
@@ -122,10 +124,10 @@
 
 			<div class="text-title-lg">{m.player()}</div>
 
-			<IconButton 
+			<IconButton
 				tooltip="Settings"
 				icon="moreVertical"
-				as="a" 
+				as="a"
 				href="/settings"
 				class="min-h-12 min-w-12 touch-manipulation hover:bg-primary/10 focus:bg-primary/20"
 			/>
@@ -166,8 +168,8 @@
 							<Slider bind:value={player.volume} />
 						</div>
 
-						<IconButton 
-							icon="volumeHigh" 
+						<IconButton
+							icon="volumeHigh"
 							tooltip="Increase volume"
 							onclick={() => {
 								const newVolume = Math.min(100, player.volume + 10)
@@ -181,7 +183,7 @@
 
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
 				{#if track}
-					<div class="grid overflow-hidden flex-1">
+					<div class="grid flex-1 overflow-hidden">
 						<div class="truncate text-body-lg">{track.title}</div>
 						<div class="truncate text-body-md">{formatArtists(track.artists)}</div>
 					</div>
@@ -199,7 +201,6 @@
 	</div>
 {/snippet}
 
-
 {#snippet queueSnippet()}
 	{#if layoutMode === 'details'}
 		<Header title="Music"></Header>
@@ -210,38 +211,45 @@
 			<div class="flex h-16 items-center border-b border-onSecondaryContainer/24 px-4">
 				<div class="w-10"></div>
 
-				<div class="mx-auto text-title-lg">
-					Music
-				</div>
+				<div class="mx-auto text-title-lg">Music</div>
 
 				<div class="w-10"></div>
 			</div>
 		{/if}
 
 		<!-- Tabs -->
-		<div class="flex gap-2 p-2 bg-secondaryContainer">
-			<button 
-				class="flex-1 py-4 sm:py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl touch-manipulation min-h-12 sm:min-h-auto {activeTab === 'queue' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
-				onclick={() => activeTab = 'queue'}
+		<div class="flex gap-2 bg-secondaryContainer p-2">
+			<button
+				class="min-h-12 flex-1 touch-manipulation rounded-xl px-4 py-4 text-center font-medium transition-all duration-200 sm:min-h-auto sm:py-3 {activeTab ===
+				'queue'
+					? 'bg-primary text-onPrimary shadow-md'
+					: 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
+				onclick={() => (activeTab = 'queue')}
 			>
 				Queue ({player.queue.length})
 			</button>
-			<button 
-				class="flex-1 py-4 sm:py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl touch-manipulation min-h-12 sm:min-h-auto {activeTab === 'playlists' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
-				onclick={() => activeTab = 'playlists'}
+			<button
+				class="min-h-12 flex-1 touch-manipulation rounded-xl px-4 py-4 text-center font-medium transition-all duration-200 sm:min-h-auto sm:py-3 {activeTab ===
+				'playlists'
+					? 'bg-primary text-onPrimary shadow-md'
+					: 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
+				onclick={() => (activeTab = 'playlists')}
 			>
 				Playlists ({playlists.length})
 			</button>
-			<button 
-				class="flex-1 py-4 sm:py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl touch-manipulation min-h-12 sm:min-h-auto {activeTab === 'search' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
-				onclick={() => activeTab = 'search'}
+			<button
+				class="min-h-12 flex-1 touch-manipulation rounded-xl px-4 py-4 text-center font-medium transition-all duration-200 sm:min-h-auto sm:py-3 {activeTab ===
+				'search'
+					? 'bg-primary text-onPrimary shadow-md'
+					: 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface active:bg-surfaceContainerHigh'}"
+				onclick={() => (activeTab = 'search')}
 			>
 				Search
 			</button>
 		</div>
 
-		<div 
-			class="flex grow p-4 touch-pan-y overflow-hidden"
+		<div
+			class="flex grow touch-pan-y overflow-hidden p-4"
 			ontouchstart={handleTouchStart}
 			ontouchmove={handleTouchMove}
 			ontouchend={handleTouchEnd}
@@ -250,25 +258,22 @@
 				{#if player.isQueueEmpty}
 					<div class="m-auto flex flex-col items-center text-center">
 						<!-- Connection Status Debug -->
-						<div class="mb-4 p-4 bg-surfaceContainer rounded w-full max-w-md">
-							<h3 class="font-bold mb-2">YTM Connection Status</h3>
-							<div class="text-left text-sm space-y-1">
+						<div class="mb-4 w-full max-w-md rounded bg-surfaceContainer p-4">
+							<h3 class="mb-2 font-bold">YTM Connection Status</h3>
+							<div class="text-sm space-y-1 text-left">
 								<p>Connected: <span class="font-mono">{player.isConnected}</span></p>
 								<p>Error: <span class="font-mono">{player.connectionError || 'None'}</span></p>
-								<p>Current Track: <span class="font-mono">{player.activeTrack?.title || 'None'}</span></p>
+								<p>
+									Current Track: <span class="font-mono">{player.activeTrack?.title || 'None'}</span
+									>
+								</p>
 								<p>Queue Length: <span class="font-mono">{player.queue.length}</span></p>
 							</div>
 							<div class="mt-3 flex gap-2">
-								<Button 
-									kind="outlined" 
-									onclick={() => player.resetConnection()}
-								>
+								<Button kind="outlined" onclick={() => player.resetConnection()}>
 									Reset Connection
 								</Button>
-								<Button 
-									kind="toned" 
-									onclick={() => player.forceReconnect()}
-								>
+								<Button kind="toned" onclick={() => player.forceReconnect()}>
 									Force Reconnect
 								</Button>
 							</div>
@@ -292,24 +297,31 @@
 					</div>
 				{:else}
 					<!-- YTM Queue Display -->
-					<div class="flex flex-col gap-2 w-full">
+					<div class="flex w-full flex-col gap-2">
 						{#each player.queue as track, index}
-							<button 
-								class="flex items-center gap-3 p-4 sm:p-2 rounded-lg bg-surfaceContainer hover:bg-surfaceContainerHigh active:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left touch-manipulation min-h-16 sm:min-h-auto {index === player.activeTrackIndex ? 'ring-2 ring-primary' : ''}"
+							<button
+								class="flex min-h-16 w-full cursor-pointer touch-manipulation items-center gap-3 rounded-lg bg-surfaceContainer p-4 text-left transition-colors hover:bg-surfaceContainerHigh active:bg-surfaceContainerHigh sm:min-h-auto sm:p-2 {index ===
+								player.activeTrackIndex
+									? 'ring-2 ring-primary'
+									: ''}"
 								onclick={() => player.playTrackAtIndex(index)}
 							>
 								{#if track.thumbnail}
-									<img src={track.thumbnail} alt={track.title} class="w-12 h-12 rounded" />
+									<img src={track.thumbnail} alt={track.title} class="h-12 w-12 rounded" />
 								{:else}
-									<div class="w-12 h-12 rounded bg-surfaceContainerHigh flex items-center justify-center text-onSurfaceVariant">🎵</div>
+									<div
+										class="flex h-12 w-12 items-center justify-center rounded bg-surfaceContainerHigh text-onSurfaceVariant"
+									>
+										🎵
+									</div>
 								{/if}
 								<div class="flex-1">
 									<div class="font-medium">{track.title}</div>
 									<div class="text-sm text-onSurfaceVariant">{formatArtists(track.artists)}</div>
 								</div>
 								{#if index === player.activeTrackIndex}
-									<div class="text-primary text-sm flex items-center gap-1">
-										<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+									<div class="text-sm flex items-center gap-1 text-primary">
+										<span class="h-2 w-2 animate-pulse rounded-full bg-primary"></span>
 										Now Playing
 									</div>
 								{/if}
@@ -319,14 +331,16 @@
 				{/if}
 			{:else if activeTab === 'playlists'}
 				<!-- Playlists Tab Content -->
-				<div class="flex flex-col gap-2 w-full">
+				<div class="flex w-full flex-col gap-2">
 					{#if !player.isConnected}
 						<div class="m-auto flex flex-col items-center text-center">
 							<Icon
 								type="playlistMusic"
 								class="color-onSecondaryContainer my-auto size-35 opacity-54"
 							/>
-							<div class="mb-4 text-body-lg">Connect to YouTube Music Desktop to see your playlists</div>
+							<div class="mb-4 text-body-lg">
+								Connect to YouTube Music Desktop to see your playlists
+							</div>
 							<Button kind="outlined" as="a" href="/settings" class="min-h-12 touch-manipulation">
 								Open Settings
 							</Button>
@@ -344,14 +358,18 @@
 						</div>
 					{:else}
 						{#each playlists as playlist}
-							<button 
-								class="flex items-center gap-3 p-4 sm:p-3 rounded-lg bg-surfaceContainer hover:bg-surfaceContainerHigh active:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left touch-manipulation min-h-16 sm:min-h-auto"
+							<button
+								class="flex min-h-16 w-full cursor-pointer touch-manipulation items-center gap-3 rounded-lg bg-surfaceContainer p-4 text-left transition-colors hover:bg-surfaceContainerHigh active:bg-surfaceContainerHigh sm:min-h-auto sm:p-3"
 								onclick={() => loadPlaylist(playlist.id)}
 							>
 								{#if playlist.thumbnail}
-									<img src={playlist.thumbnail} alt={playlist.title} class="w-12 h-12 rounded" />
+									<img src={playlist.thumbnail} alt={playlist.title} class="h-12 w-12 rounded" />
 								{:else}
-									<div class="w-12 h-12 rounded bg-surfaceContainerHigh flex items-center justify-center text-onSurfaceVariant">🎵</div>
+									<div
+										class="flex h-12 w-12 items-center justify-center rounded bg-surfaceContainerHigh text-onSurfaceVariant"
+									>
+										🎵
+									</div>
 								{/if}
 								<div class="flex-1">
 									<div class="font-medium">{playlist.title}</div>
@@ -359,14 +377,14 @@
 										{playlist.author}
 									</div>
 								</div>
-								<Icon type="playlistMusic" class="w-5 h-5 text-onSurfaceVariant" />
+								<Icon type="playlistMusic" class="h-5 w-5 text-onSurfaceVariant" />
 							</button>
 						{/each}
 					{/if}
 				</div>
 			{:else if activeTab === 'search'}
 				<!-- Search Tab Content -->
-				<div class="w-full h-full">
+				<div class="h-full w-full">
 					<YTMSearchComponent />
 				</div>
 			{/if}

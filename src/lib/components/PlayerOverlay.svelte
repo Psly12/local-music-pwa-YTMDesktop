@@ -30,16 +30,16 @@
 		class="flex h-full w-full flex-col items-center justify-between gap-2 sm:gap-4 sm:px-4 sm:pt-2 sm:pb-4"
 	>
 		<Timeline class="max-sm:hidden" />
-		
+
 		<!-- Main content row -->
 		<div class="flex h-min w-full grow items-center sm:grid sm:grid-cols-[1fr_max-content_1fr]">
-			<div class="flex grow items-center min-w-0">
+			<div class="flex min-w-0 grow items-center">
 				<Button
 					as="a"
 					href="/player"
 					kind="blank"
 					tooltip={m.playerOpenFullPlayer()}
-					class="max-sm:rounded-r-4 group flex grow items-center rounded-lg pr-2 max-sm:p-2 sm:p-2 sm:h-11 sm:max-w-45 touch-manipulation min-h-12 sm:min-h-auto"
+					class="max-sm:rounded-r-4 group flex min-h-12 grow touch-manipulation items-center rounded-lg pr-2 max-sm:p-2 sm:h-11 sm:min-h-auto sm:max-w-45 sm:p-2"
 				>
 					<div
 						class="relative -z-1 size-11 shrink-0 overflow-hidden rounded-lg bg-onSecondary active-view-player:view-name-[pl-artwork]"
@@ -68,13 +68,15 @@
 					{/if}
 				</Button>
 
-				<LikeButton class="touch-manipulation min-h-12 min-w-12 sm:min-h-11 sm:min-w-11" />
+				<LikeButton class="min-h-12 min-w-12 touch-manipulation sm:min-h-11 sm:min-w-11" />
 			</div>
 
 			<div class="ml-auto flex gap-2 pr-2 sm:hidden">
-				<PlayToggleButton class="touch-manipulation min-h-12 min-w-12 sm:min-h-11 sm:min-w-11" />
+				<PlayToggleButton class="min-h-12 min-w-12 touch-manipulation sm:min-h-11 sm:min-w-11" />
 
-				<PlayNextButton class="max-xss:hidden touch-manipulation min-h-12 min-w-12 sm:min-h-11 sm:min-w-11" />
+				<PlayNextButton
+					class="min-h-12 min-w-12 touch-manipulation max-xss:hidden sm:min-h-11 sm:min-w-11"
+				/>
 			</div>
 
 			<MainControls class="max-sm:hidden" />
@@ -85,12 +87,12 @@
 				{/if}
 			</div>
 		</div>
-		
+
 		<!-- Mobile volume controls - separate row -->
 		{#if mainStore.volumeSliderEnabled}
-			<div class="flex items-center gap-4 px-4 py-2 w-full sm:hidden">
-				<button 
-					class="flex items-center justify-center min-h-10 min-w-10 rounded-full text-onSecondaryContainer hover:bg-onSecondaryContainer/10 active:bg-onSecondaryContainer/20 transition-colors touch-manipulation"
+			<div class="flex w-full items-center gap-4 px-4 py-2 sm:hidden">
+				<button
+					class="flex min-h-10 min-w-10 touch-manipulation items-center justify-center rounded-full text-onSecondaryContainer transition-colors hover:bg-onSecondaryContainer/10 active:bg-onSecondaryContainer/20"
 					onclick={() => {
 						const newVolume = Math.max(0, player.volume - 10)
 						player.setVolume(newVolume)
@@ -99,11 +101,11 @@
 				>
 					<Icon type="volumeMid" class="text-lg" />
 				</button>
-				<div class="flex-1 min-w-0 py-1">
+				<div class="min-w-0 flex-1 py-1">
 					<VolumeSlider />
 				</div>
-				<button 
-					class="flex items-center justify-center min-h-10 min-w-10 rounded-full text-onSecondaryContainer hover:bg-onSecondaryContainer/10 active:bg-onSecondaryContainer/20 transition-colors touch-manipulation"
+				<button
+					class="flex min-h-10 min-w-10 touch-manipulation items-center justify-center rounded-full text-onSecondaryContainer transition-colors hover:bg-onSecondaryContainer/10 active:bg-onSecondaryContainer/20"
 					onclick={() => {
 						const newVolume = Math.min(100, player.volume + 10)
 						player.setVolume(newVolume)

@@ -59,7 +59,7 @@
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	<div class="px-4 pt-4 text-title-sm">{m.settingsAppearance()}</div>
 
-	<div class="flex items-center justify-between p-4 min-h-16 sm:min-h-auto">
+	<div class="flex min-h-16 items-center justify-between p-4 sm:min-h-auto">
 		<div>{m.settingsApplicationTheme()}</div>
 
 		<Select
@@ -71,13 +71,13 @@
 		/>
 	</div>
 
-	<div class="flex items-center justify-between p-4 min-h-16 sm:min-h-auto">
+	<div class="flex min-h-16 items-center justify-between p-4 sm:min-h-auto">
 		<div>{m.settingPickColorFromArtwork()}</div>
 
 		<Switch bind:checked={mainStore.pickColorFromArtwork} class="touch-manipulation" />
 	</div>
 
-	<div class="flex flex-col items-center gap-x-2 gap-y-4 p-4 sm:flex-row min-h-16 sm:min-h-auto">
+	<div class="flex min-h-16 flex-col items-center gap-x-2 gap-y-4 p-4 sm:min-h-auto sm:flex-row">
 		<div class="mr-auto flex items-center gap-2">
 			{m.settingsPrimaryColor()}
 
@@ -93,7 +93,7 @@
 			{#if mainStore.customThemePaletteHex}
 				<Button
 					kind="outlined"
-					class="max-sm:w-full min-h-12 touch-manipulation"
+					class="min-h-12 touch-manipulation max-sm:w-full"
 					disabled={!mainStore.customThemePaletteHex}
 					onclick={() => {
 						mainStore.customThemePaletteHex = null
@@ -105,7 +105,7 @@
 
 			<Button
 				kind="toned"
-				class="max-sm:w-full min-h-12 touch-manipulation"
+				class="min-h-12 touch-manipulation max-sm:w-full"
 				onclick={() => {
 					const colorPicker = document.getElementById('color-picker') as HTMLInputElement
 					colorPicker.click()
@@ -130,7 +130,7 @@
 
 	<Separator />
 
-	<div class="flex items-center justify-between p-4 min-h-16 sm:min-h-auto">
+	<div class="flex min-h-16 items-center justify-between p-4 sm:min-h-auto">
 		<div>{m.settingsMotion()}</div>
 
 		<Select

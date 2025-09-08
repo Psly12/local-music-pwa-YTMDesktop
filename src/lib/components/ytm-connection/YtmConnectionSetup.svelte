@@ -31,14 +31,13 @@
 	let host = $state(getDefaultHost())
 	let port = $state(9863)
 	let enableYTM = $state(false)
-	
+
 	// Local connecting state for debugging
 	let localConnecting = $state(false)
-	
+
 	// Debug: Track when values change
-	$effect(() => {
-	})
-	
+	$effect(() => {})
+
 	// Saved connections
 	let savedConnections = $state<YTMConnection[]>([])
 
@@ -48,11 +47,17 @@
 		const savedHost = localStorage.getItem('ytm-host')
 		const savedPort = localStorage.getItem('ytm-port')
 		const savedEnableYTM = localStorage.getItem('ytm-enabled')
-		
+
 		// Use saved host if available, otherwise keep the default from getDefaultHost()
-		if (savedHost) { host = savedHost }
-		if (savedPort) { port = Number.parseInt(savedPort, 10) || 9863 }
-		if (savedEnableYTM) { enableYTM = savedEnableYTM === 'true' }
+		if (savedHost) {
+			host = savedHost
+		}
+		if (savedPort) {
+			port = Number.parseInt(savedPort, 10) || 9863
+		}
+		if (savedEnableYTM) {
+			enableYTM = savedEnableYTM === 'true'
+		}
 
 		// Persist changes
 		$effect(() => {
@@ -78,7 +83,7 @@
 			}
 			enableYTM = true
 		}
-		
+
 		// Trigger immediate connection change callback to update UI
 		onConnectionChange?.(ytmStore.isConnected)
 	})
@@ -92,51 +97,51 @@
 			await ytmStore.disconnect()
 			return
 		}
-		
+
 		// Force a small delay to ensure any pending input events are processed
-		await new Promise(resolve => setTimeout(resolve, 10))
-		
+		await new Promise((resolve) => setTimeout(resolve, 10))
+
 		// Also try to get values directly from form elements as backup
 		const hostInput = document.querySelector('input[name="ytm-host"]') as HTMLInputElement
 		const portInput = document.querySelector('input[name="ytm-port"]') as HTMLInputElement
-		
+
 		// Use DOM values if they differ from state (binding issue detection)
 		const formHostValue = hostInput?.value || host
 		const formPortValue = portInput?.value ? Number.parseInt(portInput.value, 10) : port
-		
+
 		// Ensure we have the latest values from the form
 		const currentHost = (formHostValue || '').trim() || '127.0.0.1'
 		const currentPort = formPortValue || 9863
 
 		// Set local connecting state
 		localConnecting = true
-		
+
 		try {
 			const success = await ytmStore.connect(currentHost, currentPort)
-			
+
 			// Force a small delay to ensure UI has time to update
-			await new Promise(resolve => setTimeout(resolve, 100))
-			
+			await new Promise((resolve) => setTimeout(resolve, 100))
+
 			if (success) {
 				// Save this connection for future use
 				const connection: YTMConnection = {
 					host: currentHost,
 					port: currentPort,
 					token: ytmStore.getCurrentConnection()?.token,
-					connected: true
+					connected: true,
 				}
-				
+
 				// Add to saved connections if not already there
 				const existingIndex = savedConnections.findIndex(
-					c => c.host === currentHost && c.port === currentPort
+					(c) => c.host === currentHost && c.port === currentPort,
 				)
-				
+
 				if (existingIndex >= 0) {
 					savedConnections[existingIndex] = connection
 				} else {
 					savedConnections.push(connection)
 				}
-				
+
 				// Update the form values with the normalized values
 				host = currentHost
 				port = currentPort
@@ -179,7 +184,7 @@
 					name="ytm-host"
 					bind:value={host}
 					placeholder="127.0.0.1"
-					class={ytmStore.isConnecting ? "disabled" : ""}
+					class={ytmStore.isConnecting ? 'disabled' : ''}
 				/>
 			</div>
 
@@ -196,7 +201,7 @@
 			</div>
 
 			<div class="connection-actions">
-				<Button 
+				<Button
 					onclick={handleConnect}
 					disabled={ytmStore.isConnecting || localConnecting}
 					kind={ytmStore.isConnected ? 'outlined' : 'filled'}
@@ -214,7 +219,9 @@
 					<div class="status connected">
 						✓ Connected to YouTube Music Desktop
 						{#if ytmStore.getConnectionHealth().timeUntilExpiry}
-							{@const hoursUntilExpiry = Math.floor(ytmStore.getConnectionHealth().timeUntilExpiry! / (1000 * 60 * 60))}
+							{@const hoursUntilExpiry = Math.floor(
+								ytmStore.getConnectionHealth().timeUntilExpiry! / (1000 * 60 * 60),
+							)}
 							<small class="token-info">
 								Token expires in {hoursUntilExpiry}h
 							</small>
@@ -252,14 +259,14 @@
 								{/if}
 							</div>
 							<div class="connection-actions-small">
-								<Button 
+								<Button
 									kind="toned"
 									onclick={() => handleUseSavedConnection(connection)}
 									disabled={ytmStore.isConnecting}
 								>
 									Use
 								</Button>
-								<Button 
+								<Button
 									kind="flat"
 									onclick={() => handleRemoveSavedConnection(index)}
 									disabled={ytmStore.isConnecting}

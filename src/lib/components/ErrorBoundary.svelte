@@ -2,17 +2,16 @@
 	import type { Snippet } from 'svelte'
 	import { logger } from '$lib/helpers/logger.ts'
 
-	
 	interface Props {
 		children: Snippet
 		fallback?: Snippet<[Error]>
 	}
-	
+
 	const { children, fallback }: Props = $props()
-	
+
 	let hasError = $state(false)
 	let error = $state<Error | null>(null)
-	
+
 	// Global error handler for unhandled promise rejections
 	if (typeof window !== 'undefined') {
 		window.addEventListener('unhandledrejection', (event) => {
@@ -21,19 +20,19 @@
 			error = event.reason instanceof Error ? event.reason : new Error(String(event.reason))
 			event.preventDefault()
 		})
-		
+
 		window.addEventListener('error', (event) => {
 			logger.error('Global error', event.error || new Error(event.message))
 			hasError = true
 			error = event.error || new Error(event.message)
 		})
 	}
-	
+
 	const reset = () => {
 		hasError = false
 		error = null
 	}
-	
+
 	const defaultFallback: Snippet<[Error]> = (error: Error) => {
 		return `
 			<div class="flex min-h-screen items-center justify-center bg-surface text-onSurface">
