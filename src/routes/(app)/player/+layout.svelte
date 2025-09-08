@@ -16,7 +16,6 @@
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import YTMSearchComponent from '$lib/components/player/YtmSearchComponent.svelte'
 	import Slider from '$lib/components/Slider.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import { useMainStore } from '$lib/stores/main/use-store.ts'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
@@ -61,15 +60,15 @@
 	let isScrolling = false
 
 	const handleTouchStart = (e: TouchEvent) => {
-		touchStartX = e.touches[0].clientX
-		touchStartY = e.touches[0].clientY
+		touchStartX = e.touches[0]?.clientX || 0
+		touchStartY = e.touches[0]?.clientY || 0
 		isScrolling = false
 	}
 
 	const handleTouchMove = (e: TouchEvent) => {
 		// Check if user is scrolling vertically more than horizontally
-		const deltaY = Math.abs(e.touches[0].clientY - touchStartY)
-		const deltaX = Math.abs(e.touches[0].clientX - touchStartX)
+		const deltaY = Math.abs((e.touches[0]?.clientY || 0) - touchStartY)
+		const deltaX = Math.abs((e.touches[0]?.clientX || 0) - touchStartX)
 
 		if (deltaY > deltaX * 1.5) {
 			isScrolling = true
@@ -81,7 +80,7 @@
 			return
 		}
 
-		const touchEndX = e.changedTouches[0].clientX
+		const touchEndX = e.changedTouches[0]?.clientX || 0
 		const swipeDistance = touchStartX - touchEndX
 		const minSwipeDistance = 80
 

@@ -94,21 +94,21 @@ export class YTMAPIClient {
 			// Handle empty responses gracefully
 			const text = await response.text()
 			if (!text.trim()) {
-				return null // Empty response is OK for some commands
+				return {} as T // Empty response is OK for some commands
 			}
 
 			try {
 				return JSON.parse(text)
 			} catch (jsonError) {
 				console.warn('[YTM Client] Failed to parse JSON response:', text)
-				throw new Error(`Invalid JSON response: ${jsonError.message}`)
+				throw new Error(`Invalid JSON response: ${(jsonError as Error).message}`)
 			}
 		} catch (error) {
 			// Handle network errors with retry
-			if (retryCount < 3 && (error instanceof TypeError || error.message.includes('fetch'))) {
+			if (retryCount < 3 && (error instanceof TypeError || (error as Error).message?.includes('fetch'))) {
 				console.warn(
 					`[YTM Client] Network error, retrying... (${retryCount + 1}/3)`,
-					error.message,
+					(error as Error).message,
 				)
 				await this.delay(1000 * (retryCount + 1))
 				return this.fetchAPI(endpoint, options, host, port, retryCount + 1)
@@ -309,7 +309,7 @@ export class YTMAPIClient {
 	}
 
 	isConnected(): boolean {
-		return this.socket?.connected
+		return this.socket?.connected ?? false
 	}
 
 	getCurrentConnection(): YTMConnection | null {
@@ -429,7 +429,7 @@ export class YTMAPIClient {
 			await this.getPlayerState()
 		} catch (error) {
 			console.warn('[YTM Client] Health check failed:', error)
-			if (error.message?.includes('Authentication failed')) {
+			if ((error as Error).message?.includes('Authentication failed')) {
 				this.clearConnection()
 				this.onConnectionChange?.(false)
 			}

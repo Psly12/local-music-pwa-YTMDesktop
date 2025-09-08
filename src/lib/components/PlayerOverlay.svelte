@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import Button from './Button.svelte'
-	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'
 	import LikeButton from './player/buttons/LikeButton.svelte'
 	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
@@ -61,7 +60,7 @@
 					{#if track}
 						<div class="mr-1 ml-4 grid min-w-0">
 							<div class="truncate text-body-md">
-								{track.name}
+								{(track as any).name || track.title}
 							</div>
 							<div class="truncate text-body-sm">{formatArtists(track.artists)}</div>
 						</div>

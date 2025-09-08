@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ClassValue } from 'clsx'
+	import type { ClassValue } from 'svelte/elements'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import Slider from '../Slider.svelte'

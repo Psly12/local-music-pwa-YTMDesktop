@@ -62,12 +62,12 @@
 		}
 
 		const highest = thumbnails.reduce((best, current) => {
-			const bestSize = (best.width || 0) * (best.height || 0)
+			const bestSize = (best?.width || 0) * (best?.height || 0)
 			const currentSize = (current.width || 0) * (current.height || 0)
 			return currentSize > bestSize ? current : best
 		}, thumbnails[0])
 
-		return highest.url
+		return highest?.url || ''
 	}
 </script>
 
@@ -145,9 +145,7 @@
 							{#if result.artist}
 								<p class="text-sm truncate text-onSurfaceVariant">{result.artist}</p>
 							{/if}
-							{#if result.album}
-								<p class="text-xs truncate text-onSurfaceVariant">{result.album}</p>
-							{/if}
+							<!-- Album info not available in YTM search results -->
 							<div class="mt-1 flex items-center gap-2">
 								<span
 									class="text-xs rounded-full bg-primaryContainer px-2 py-1 text-onPrimaryContainer"

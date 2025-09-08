@@ -36,7 +36,11 @@
       "Bash(dir:*)",
       "Bash(NODE_ENV=production npm run build)",
       "Bash(gh repo view:*)",
-      "Bash(gh run list:*)"
+      "Bash(gh run list:*)",
+      "Bash(del \"src\\routes\\api\\playlists$types.d.ts\")",
+      "Bash(git mv:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

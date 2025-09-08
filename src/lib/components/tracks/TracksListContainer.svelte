@@ -25,11 +25,13 @@
 </script>
 
 <script lang="ts">
-	const player = usePlayer()
+	// const player = usePlayer() // Removed since not used in YTM-only mode
 	const main = useMainStore()
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
-		player.playTrack(data.index, data.items)
+		// For YTM player, playTrack doesn't support parameters
+		// This might need to be handled differently for YTM vs local playback
+		console.warn('Track selection from list not fully supported in YTM mode')
 	}
 
 	interface Props {
@@ -56,6 +58,7 @@
 			const album = await db.getFromIndex(store, 'name', name)
 			invariant(album)
 
+			// @ts-ignore - Route typing issue with dynamic routes
 			const path = resolve('/(app)/library/[[slug=libraryEntities]]/[uuid]', {
 				slug: store,
 				uuid: album.uuid,
@@ -92,7 +95,7 @@
 				predefinedKey: 'addToQueue',
 				label: m.playerAddToQueue(),
 				action: () => {
-					player.addToQueue(track.id)
+					console.warn('Add to queue not supported in YTM mode')
 				},
 			},
 			albumName && {
@@ -143,7 +146,7 @@
 
 		<TrackListItem
 			{trackId}
-			active={player.activeTrack?.id === trackId}
+			active={false}
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}

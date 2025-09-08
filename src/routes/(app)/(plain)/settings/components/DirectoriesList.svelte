@@ -132,7 +132,7 @@
 					{dir.legacy ? m.settingsTracksInsideAppMemory() : dir.handle.name}
 				</div>
 				<div class="text-body-sm">
-					{m.settingsDirectoriesTracksCount({ count: dir.count })}
+					{m.settingsDirectoriesTracksCount({ count: dir.count || 0 })}
 				</div>
 			</div>
 

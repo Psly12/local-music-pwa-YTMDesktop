@@ -1,9 +1,10 @@
 <script lang="ts">
 	interface Props {
 		checked: boolean
+		class?: string
 	}
 
-	let { checked = $bindable(false) }: Props = $props()
+	let { checked = $bindable(false), class: className }: Props = $props()
 
 	const toggle = () => {
 		checked = !checked
@@ -14,6 +15,7 @@
 	class={[
 		'flex h-8 w-13 shrink-0 cursor-pointer items-center rounded-4xl border-2 outline-offset-2 transition-all duration-150',
 		checked ? 'border-transparent bg-primary' : 'border-outline bg-surfaceContainerHigh',
+		className,
 	]}
 	tabindex="0"
 	role="switch"

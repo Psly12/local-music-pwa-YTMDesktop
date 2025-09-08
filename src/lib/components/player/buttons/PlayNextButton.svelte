@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ClassValue } from 'clsx'
+	import type { ClassValue } from 'svelte/elements'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import * as m from '$paraglide/messages.js'
 	import PlayPreviousNextIcon from '../../animated-icons/PlayPreviousNextIcon.svelte'

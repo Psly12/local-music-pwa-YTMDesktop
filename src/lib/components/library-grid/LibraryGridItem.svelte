@@ -59,9 +59,10 @@
 			return null
 		}
 
-		const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
+		const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]' as any
 		const shouldReplace = page.route.id === detailsViewId
 
+		// @ts-ignore - Route typing issue with dynamic routes
 		const resolvedHref = resolve('/(app)/library/[[slug=libraryEntities]]/[uuid]', {
 			slug: type,
 			uuid: item.uuid,

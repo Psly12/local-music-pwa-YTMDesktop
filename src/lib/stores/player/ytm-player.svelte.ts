@@ -13,12 +13,12 @@ function getHighestQualityThumbnail(
 	}
 
 	const highestQuality = thumbnails.reduce((best, current) => {
-		const bestSize = (best.width || 0) * (best.height || 0)
+		const bestSize = (best?.width || 0) * (best?.height || 0)
 		const currentSize = (current.width || 0) * (current.height || 0)
 		return currentSize > bestSize ? current : best
 	}, thumbnails[0])
 
-	return highestQuality.url
+	return highestQuality?.url || ''
 }
 
 export class YTMPlayerStore {
@@ -345,31 +345,21 @@ export class YTMPlayerStore {
 		this.volume = volume
 	}
 
-	volumeUp = (increment = 10): void => {
-		if (this.#muted) {
-			// Volume up while muted: unmute and increase from zero
-			this.#muted = false
-			// Send unmute command to YTM
-			if (ytmStore.isConnected) {
-				ytmStore.unmute().catch((error) => {
-					console.warn('Failed to unmute:', error)
-				})
-			}
-			// Increase from zero
-			this.volume = Math.min(increment, 100)
-		} else {
-			// Normal volume increase
-			this.volume = Math.min(this.#volume + increment, 100)
+	volumeUp = (): void => {
+		// Use YTM's built-in volume up command
+		if (ytmStore.isConnected) {
+			ytmStore.volumeUp().catch((error) => {
+				console.warn('Failed to increase volume:', error)
+			})
 		}
 	}
 
-	volumeDown = async (decrement = 10): Promise<void> => {
-		if (this.#muted) {
-			// Volume down while muted: toggle mute (unmute to restore volume)
-			await this.toggleMute()
-		} else {
-			// Normal volume decrease
-			this.volume = Math.max(this.#volume - decrement, 0)
+	volumeDown = (): void => {
+		// Use YTM's built-in volume down command
+		if (ytmStore.isConnected) {
+			ytmStore.volumeDown().catch((error) => {
+				console.warn('Failed to decrease volume:', error)
+			})
 		}
 	}
 
@@ -430,7 +420,7 @@ export class YTMPlayerStore {
 
 	get isLiked(): boolean {
 		// Get like status from current track (2 = liked, 1 = disliked, 0 = neutral)
-		return ytmStore.state?.video?.likeStatus === 2
+		return (ytmStore.state?.video as any)?.likeStatus === 2
 	}
 
 	// Auto-connect on startup - only restore existing valid connections

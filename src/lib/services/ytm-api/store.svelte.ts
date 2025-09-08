@@ -17,12 +17,12 @@ function getHighestQualityThumbnail(
 	}
 
 	const highestQuality = thumbnails.reduce((best, current) => {
-		const bestSize = (best.width || 0) * (best.height || 0)
+		const bestSize = (best?.width || 0) * (best?.height || 0)
 		const currentSize = (current.width || 0) * (current.height || 0)
 		return currentSize > bestSize ? current : best
 	}, thumbnails[0])
 
-	return highestQuality.url
+	return highestQuality?.url || ''
 }
 
 class YTMStore {
@@ -91,7 +91,7 @@ class YTMStore {
 	}
 
 	get queue(): YTMTrack[] {
-		return this.playerState?.player?.queue?.items || []
+		return ((this.playerState?.player?.queue?.items || []) as unknown) as YTMTrack[]
 	}
 
 	async connect(host = '127.0.0.1', port = 9863): Promise<boolean> {
@@ -103,7 +103,7 @@ class YTMStore {
 			// First, test if YTM Desktop is running by trying to reach the API
 			logger.ytm.debug('Testing if YTM Desktop is reachable...', { host, port })
 			logger.ytm.info('MANUAL CONNECT: About to make HEAD request to test reachability')
-			const _testResponse = await fetch(`http://${host}:${port}/api/v1/state`, {
+			await fetch(`http://${host}:${port}/api/v1/state`, {
 				method: 'HEAD',
 				mode: 'cors',
 			}).catch((e) => {
@@ -146,7 +146,7 @@ class YTMStore {
 				} catch (tokenError) {
 					logger.ytm.warn(
 						'Existing token is invalid, clearing and requesting new auth...',
-						tokenError,
+						{ error: tokenError },
 					)
 					logger.ytm.warn(
 						'AUTO-CONNECT PATH: Token verification failed, falling back to auth flow',
@@ -190,7 +190,7 @@ class YTMStore {
 
 				try {
 					logger.ytm.debug(`Attempting token exchange (${attempts}/${maxAttempts})...`)
-					const _token = await this.client.exchangeToken(
+					await this.client.exchangeToken(
 						{
 							appId: 'localmusicpwa', // Must match the requestcode appId
 							code,
@@ -356,7 +356,21 @@ class YTMStore {
 		if (!this.connected) {
 			return
 		}
-		await this.client.sendCommand('setVolume', volume)
+		await this.client.sendCommand('setVolume', volume as any)
+	}
+
+	async volumeUp(): Promise<void> {
+		if (!this.connected) {
+			return
+		}
+		await this.client.sendCommand('volumeUp')
+	}
+
+	async volumeDown(): Promise<void> {
+		if (!this.connected) {
+			return
+		}
+		await this.client.sendCommand('volumeDown')
 	}
 
 	async mute(): Promise<void> {
@@ -377,14 +391,14 @@ class YTMStore {
 		if (!this.connected) {
 			return
 		}
-		await this.client.sendCommand('seekTo', position)
+		await this.client.sendCommand('seekTo', position as any)
 	}
 
 	async playTrackAtIndex(index: number): Promise<void> {
 		if (!this.connected) {
 			return
 		}
-		await this.client.sendCommand('playQueueIndex', index)
+		await this.client.sendCommand('playQueueIndex', index as any)
 	}
 
 	async likeTrack(): Promise<void> {
@@ -416,7 +430,7 @@ class YTMStore {
 		// Based on working code, repeat cycles through modes 0,1,2
 		const currentMode = this.playerState?.player?.queue?.repeatMode || 0
 		const nextMode = (currentMode + 1) % 3
-		await this.client.sendCommand('repeatMode', nextMode)
+		await this.client.sendCommand('repeatMode', nextMode as any)
 	}
 
 	getCurrentConnection(): YTMConnection | null {

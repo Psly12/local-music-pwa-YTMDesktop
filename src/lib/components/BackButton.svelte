@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ClassValue } from 'clsx'
+	import type { ClassValue } from 'svelte/elements'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import * as m from '$paraglide/messages.js'

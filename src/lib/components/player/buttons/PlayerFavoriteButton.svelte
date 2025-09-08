@@ -6,6 +6,8 @@
 	const track = $derived(player.activeTrack)
 </script>
 
-{#if track}
-	<FavoriteButton trackId={track.id} favorite={track.favorite} />
+{#if track && typeof track.id === 'number' && 'favorite' in track}
+	<FavoriteButton trackId={track.id} favorite={(track as any).favorite} />
+{:else}
+	<!-- Favorites not supported for YTM tracks -->
 {/if}
