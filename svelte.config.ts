@@ -10,8 +10,20 @@ const config: Config = {
 	kit: {
 		outDir: './.generated/svelte-kit',
 		adapter: adapter({
-			fallback: '200.html',
+			fallback: 'index.html',
 		}),
+		prerender: {
+			handleHttpError: ({ path, referrer, message }) => {
+				// Ignore icon errors during prerender
+				if (path.includes('/icons/')) {
+					return;
+				}
+				throw new Error(message);
+			},
+		},
+		paths: {
+			base: process.env.NODE_ENV === 'production' ? '/local-music-pwa-YTMDesktop' : '',
+		},
 		serviceWorker: {
 			register: true,
 		},
@@ -28,7 +40,7 @@ const config: Config = {
 					'img-src': ['self', 'blob:', 'data:', 'https:', 'https://snaeplayer.goatcounter.com/count', 'https://lh3.googleusercontent.com', 'https://yt3.ggpht.com', 'https://i.ytimg.com'],
 					'media-src': ['self', 'blob:'],
 					'font-src': ['self'],
-					'connect-src': ['self', 'http://localhost:*', 'http://127.0.0.1:*', 'http://10.20.143.11:*', 'http://192.168.1.1:*', 'http://172.16.0.1:*'],
+					'connect-src': ['self', 'http://localhost:*', 'http://127.0.0.1:*', 'http://10.20.143.11:*', 'http://192.168.1.1:*', 'http://172.16.0.1:*', 'https://*.github.io'],
 					'form-action': ['none'],
 					'manifest-src': ['self'],
 					'base-uri': ['none'],
