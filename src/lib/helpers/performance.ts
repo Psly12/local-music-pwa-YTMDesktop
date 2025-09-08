@@ -41,7 +41,7 @@ export const monitorMemoryUsage = () => {
 }
 
 // Report web vitals for performance monitoring
-export const reportWebVitals = (metric: any) => {
+export const reportWebVitals = (metric: { name: string; value: number; rating: string }) => {
 	if (import.meta.env.PROD && import.meta.env.VITE_ENABLE_ANALYTICS) {
 		// Log critical web vitals
 		if (['CLS', 'FID', 'FCP', 'LCP', 'TTFB'].includes(metric.name)) {
@@ -55,7 +55,7 @@ export const reportWebVitals = (metric: any) => {
 }
 
 // Debounce utility for performance optimization
-export const debounce = <T extends (...args: any[]) => void>(
+export const debounce = <T extends (...args: unknown[]) => void>(
 	func: T,
 	wait: number,
 	immediate = false,
@@ -81,7 +81,7 @@ export const debounce = <T extends (...args: any[]) => void>(
 }
 
 // Throttle utility for performance optimization
-export const throttle = <T extends (...args: any[]) => void>(
+export const throttle = <T extends (...args: unknown[]) => void>(
 	func: T,
 	limit: number,
 ): ((...args: Parameters<T>) => void) => {
@@ -91,7 +91,9 @@ export const throttle = <T extends (...args: any[]) => void>(
 		if (!inThrottle) {
 			func(...args)
 			inThrottle = true
-			setTimeout(() => (inThrottle = false), limit)
+			setTimeout(() => {
+				inThrottle = false
+			}, limit)
 		}
 	}
 }
