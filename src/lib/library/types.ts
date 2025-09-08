@@ -48,7 +48,7 @@ export interface ParsedTrackData {
 
 export interface UnknownTrack extends ParsedTrackData {
 	uuid: string
-	file: FileEntity
+	file?: FileEntity
 	scannedAt: number
 	fileName: string
 	directory: number

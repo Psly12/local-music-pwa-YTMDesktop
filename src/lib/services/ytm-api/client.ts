@@ -54,11 +54,16 @@ export class YTMAPIClient {
 		}
 
 		try {
+			const controller = new AbortController()
+			const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+			
 			const response = await fetch(url, {
 				...options,
 				headers,
-				timeout: 10000, // 10 second timeout
+				signal: controller.signal,
 			})
+			
+			clearTimeout(timeoutId)
 
 			if (!response.ok) {
 				// Handle token expiry or invalid token

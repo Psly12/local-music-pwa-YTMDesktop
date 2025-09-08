@@ -6,7 +6,7 @@ const safeLocalStorage = {
 		try {
 			return localStorage.getItem(key)
 		} catch (error) {
-			logger.warn('Failed to read from localStorage', error, { key })
+			logger.error('Failed to read from localStorage', error, { key })
 			return null
 		}
 	},
@@ -17,7 +17,7 @@ const safeLocalStorage = {
 			return true
 		} catch (error) {
 			if (error instanceof Error && error.name === 'QuotaExceededError') {
-				logger.warn('localStorage quota exceeded', error, { key })
+				logger.error('localStorage quota exceeded', error, { key })
 				// Try to clear some old data
 				try {
 					const keys = Object.keys(localStorage).filter((k) =>
@@ -36,7 +36,7 @@ const safeLocalStorage = {
 					}
 				} catch {}
 			}
-			logger.warn('Failed to write to localStorage', error, { key })
+			logger.error('Failed to write to localStorage', error, { key })
 			return false
 		}
 	},
@@ -55,7 +55,7 @@ export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): v
 				instance[key] = value
 			}
 		} catch (error) {
-			logger.warn('Failed to parse stored value', error, { storeName, key: String(key) })
+			logger.error('Failed to parse stored value', error, { storeName, key: String(key) })
 		}
 
 		let initial = true
@@ -71,13 +71,13 @@ export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): v
 				try {
 					const success = safeLocalStorage.setItem(fullKey, JSON.stringify(updatedValue))
 					if (!success) {
-						logger.warn('Failed to persist value', undefined, {
+						logger.warn('Failed to persist value', {
 							storeName,
 							key: String(key),
 						})
 					}
 				} catch (error) {
-					logger.warn('Failed to serialize value for persistence', error, {
+					logger.error('Failed to serialize value for persistence', error, {
 						storeName,
 						key: String(key),
 					})

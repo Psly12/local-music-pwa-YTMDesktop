@@ -26,7 +26,7 @@ export const monitorMemoryUsage = () => {
 			const limit = Math.round(memory.jsHeapSizeLimit / 1048576)
 
 			if (used / limit > 0.8) {
-				logger.warn('High memory usage detected', undefined, {
+				logger.warn('High memory usage detected', {
 					used: `${used}MB`,
 					total: `${total}MB`,
 					limit: `${limit}MB`,

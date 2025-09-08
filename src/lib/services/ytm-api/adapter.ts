@@ -71,7 +71,39 @@ export function extractArtistsFromYTMTracks(tracks: YTMTrack[]): Artist[] {
 }
 
 export function createYTMCompatibleData(state: YTMPlayerState, playlists: YTMPlaylist[]) {
-	const allTracks = [...(state.track ? [state.track] : []), ...state.queue]
+	// Extract tracks from the queue items and current video
+	const currentVideo = state.video
+	const queueItems = state.player?.queue?.items || []
+	
+	const allTracks: YTMTrack[] = []
+	
+	// Add current video as a track
+	if (currentVideo) {
+		allTracks.push({
+			title: currentVideo.title,
+			artists: [currentVideo.author],
+			author: currentVideo.author,
+			album: currentVideo.album,
+			duration: currentVideo.durationSeconds,
+			thumbnail: currentVideo.thumbnails?.[0]?.url || '',
+			id: currentVideo.id,
+			url: '', // Not available in player state
+		})
+	}
+	
+	// Add queue items as tracks
+	queueItems.forEach(item => {
+		allTracks.push({
+			title: item.title,
+			artists: [item.author],
+			author: item.author,
+			album: undefined,
+			duration: 0, // Duration not provided in queue items
+			thumbnail: item.thumbnails?.[0]?.url || '',
+			id: item.videoId,
+			url: '', // Not available in player state
+		})
+	})
 
 	return {
 		tracks: allTracks.map(adaptYTMTrackToTrack),
