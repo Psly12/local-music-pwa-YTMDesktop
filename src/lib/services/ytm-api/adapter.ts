@@ -74,9 +74,9 @@ export function createYTMCompatibleData(state: YTMPlayerState, playlists: YTMPla
 	// Extract tracks from the queue items and current video
 	const currentVideo = state.video
 	const queueItems = state.player?.queue?.items || []
-	
+
 	const allTracks: YTMTrack[] = []
-	
+
 	// Add current video as a track
 	if (currentVideo) {
 		allTracks.push({
@@ -90,9 +90,9 @@ export function createYTMCompatibleData(state: YTMPlayerState, playlists: YTMPla
 			url: '', // Not available in player state
 		})
 	}
-	
+
 	// Add queue items as tracks
-	queueItems.forEach(item => {
+	queueItems.forEach((item) => {
 		allTracks.push({
 			title: item.title,
 			artists: [item.author],
