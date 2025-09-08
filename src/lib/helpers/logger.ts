@@ -21,10 +21,10 @@ class Logger {
 
 	private shouldLog(level: LogLevel): boolean {
 		if (!this.isEnabled) return false
-		
+
 		// Always log errors and warnings
 		if (level === 'error' || level === 'warn') return true
-		
+
 		// Only log info and debug in development
 		return this.isDevelopment
 	}
@@ -49,9 +49,10 @@ class Logger {
 
 	error(message: string, error?: Error | unknown, context?: LogContext): void {
 		if (this.shouldLog('error')) {
-			const errorContext = error instanceof Error 
-				? { ...context, error: error.message, stack: error.stack }
-				: { ...context, error }
+			const errorContext =
+				error instanceof Error
+					? { ...context, error: error.message, stack: error.stack }
+					: { ...context, error }
 			console.error(this.formatMessage('error', message, errorContext))
 		}
 	}
@@ -61,15 +62,18 @@ class Logger {
 		debug: (message: string, context?: LogContext) => this.debug(`[YTM] ${message}`, context),
 		info: (message: string, context?: LogContext) => this.info(`[YTM] ${message}`, context),
 		warn: (message: string, context?: LogContext) => this.warn(`[YTM] ${message}`, context),
-		error: (message: string, error?: Error | unknown, context?: LogContext) => this.error(`[YTM] ${message}`, error, context)
+		error: (message: string, error?: Error | unknown, context?: LogContext) =>
+			this.error(`[YTM] ${message}`, error, context),
 	}
 
 	// Player-specific logging methods
 	player = {
-		debug: (message: string, context?: LogContext) => this.debug(`[Player] ${message}`, context),
+		debug: (message: string, context?: LogContext) =>
+			this.debug(`[Player] ${message}`, context),
 		info: (message: string, context?: LogContext) => this.info(`[Player] ${message}`, context),
 		warn: (message: string, context?: LogContext) => this.warn(`[Player] ${message}`, context),
-		error: (message: string, error?: Error | unknown, context?: LogContext) => this.error(`[Player] ${message}`, error, context)
+		error: (message: string, error?: Error | unknown, context?: LogContext) =>
+			this.error(`[Player] ${message}`, error, context),
 	}
 }
 

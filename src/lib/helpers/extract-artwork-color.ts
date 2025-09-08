@@ -10,26 +10,26 @@ const colorCache = new Map<string, number | undefined>()
  */
 export async function extractColorFromImageUrl(imageUrl: string): Promise<number | undefined> {
 	if (!imageUrl) return undefined
-	
+
 	// Check cache first
 	if (colorCache.has(imageUrl)) {
 		return colorCache.get(imageUrl)
 	}
-	
+
 	try {
 		// Try with crossOrigin first, fallback without if CORS fails
 		let img = new Image()
 		let corsEnabled = true
-		
+
 		try {
 			img.crossOrigin = 'anonymous'
-			
+
 			// Load the image
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error('Image load timeout'))
 				}, 10000) // 10 second timeout
-				
+
 				img.onload = () => {
 					clearTimeout(timeout)
 					resolve()
@@ -45,12 +45,12 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 			console.log('CORS failed, trying without crossOrigin for:', imageUrl)
 			corsEnabled = false
 			img = new Image()
-			
+
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error('Image load timeout'))
 				}, 10000)
-				
+
 				img.onload = () => {
 					clearTimeout(timeout)
 					resolve()
@@ -62,30 +62,30 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 				img.src = imageUrl
 			})
 		}
-		
+
 		// Create canvas and draw image
 		const canvas = document.createElement('canvas')
 		const ctx = canvas.getContext('2d')
 		if (!ctx) throw new Error('Could not get canvas context')
-		
+
 		// Calculate dimensions maintaining aspect ratio
 		const aspectRatio = img.width / img.height
 		let canvasWidth = CANVAS_SIZE
 		let canvasHeight = CANVAS_SIZE
-		
+
 		if (aspectRatio > 1) {
 			canvasHeight = CANVAS_SIZE / aspectRatio
 		} else {
 			canvasWidth = CANVAS_SIZE * aspectRatio
 		}
-		
+
 		canvas.width = Math.floor(canvasWidth)
 		canvas.height = Math.floor(canvasHeight)
-		
+
 		// Draw image and extract pixel data
 		ctx.imageSmoothingEnabled = false
 		ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-		
+
 		let imageData: ImageData
 		try {
 			imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -95,12 +95,12 @@ export async function extractColorFromImageUrl(imageUrl: string): Promise<number
 			colorCache.set(imageUrl, undefined)
 			return undefined
 		}
-		
+
 		const primaryColor = getPrimaryColor(imageData.data, canvas.width, canvas.height)
-		
+
 		// Cache the result
 		colorCache.set(imageUrl, primaryColor)
-		
+
 		return primaryColor
 	} catch (error) {
 		console.warn('Failed to extract color from image:', imageUrl, error)

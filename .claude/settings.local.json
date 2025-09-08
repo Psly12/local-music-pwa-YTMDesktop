@@ -32,7 +32,10 @@
       "Bash(kill:*)",
       "WebSearch",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(NPM_CONFIG_CACHE=/tmp/npm-cache npm install youtube-search-api)"
+      "Bash(NPM_CONFIG_CACHE=/tmp/npm-cache npm install youtube-search-api)",
+      "Bash(dir:*)",
+      "Bash(NODE_ENV=production npm run build)",
+      "Bash(gh repo view:*)"
     ],
     "deny": [],
     "ask": []

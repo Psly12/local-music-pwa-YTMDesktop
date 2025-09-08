@@ -2,8 +2,8 @@
 	import type { ClassValue } from 'clsx'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import IconButton from './IconButton.svelte'
 	import * as m from '$paraglide/messages.js'
+	import IconButton from './IconButton.svelte'
 
 	interface Props {
 		class?: ClassValue

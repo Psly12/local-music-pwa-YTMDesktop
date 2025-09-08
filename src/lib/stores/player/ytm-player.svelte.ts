@@ -1,20 +1,22 @@
-import { formatArtists } from '$lib/helpers/utils/text.ts'
-import { ytmStore } from '$lib/services/ytm-api'
-import type { YTMTrack, YTMPlaylist, YTMSearchResponse } from '$lib/services/ytm-api'
 import { extractColorFromImageUrl } from '$lib/helpers/extract-artwork-color.ts'
+import { formatArtists } from '$lib/helpers/utils/text.ts'
+import type { YTMPlaylist, YTMSearchResponse, YTMTrack } from '$lib/services/ytm-api'
+import { ytmStore } from '$lib/services/ytm-api'
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
 // Utility function to get the highest quality thumbnail from YTM thumbnails array
-function getHighestQualityThumbnail(thumbnails?: Array<{ url: string; width?: number; height?: number }>): string {
+function getHighestQualityThumbnail(
+	thumbnails?: Array<{ url: string; width?: number; height?: number }>,
+): string {
 	if (!thumbnails || thumbnails.length === 0) return ''
-	
+
 	const highestQuality = thumbnails.reduce((best, current) => {
 		const bestSize = (best.width || 0) * (best.height || 0)
 		const currentSize = (current.width || 0) * (current.height || 0)
 		return currentSize > bestSize ? current : best
 	}, thumbnails[0])
-	
+
 	return highestQuality.url
 }
 
@@ -38,16 +40,16 @@ export class YTMPlayerStore {
 			this.#muted = false
 			// Send unmute command to YTM
 			if (ytmStore.isConnected) {
-				ytmStore.unmute().catch(error => {
+				ytmStore.unmute().catch((error) => {
 					console.warn('Failed to unmute:', error)
 				})
 			}
 		}
-		
+
 		this.#volume = value
 		// Sync with YTM
 		if (ytmStore.isConnected) {
-			ytmStore.setVolume(value).catch(error => {
+			ytmStore.setVolume(value).catch((error) => {
 				console.warn('Failed to sync volume to YTM:', error)
 			})
 		}
@@ -64,12 +66,12 @@ export class YTMPlayerStore {
 	// YTM-derived properties
 	get playing(): boolean {
 		const currentPlaying = ytmStore.state?.player?.trackState === 1
-		
+
 		// If we're seeking, return the last stable state to prevent flickering
 		if (this.#seeking) {
 			return this.#lastStablePlayingState
 		}
-		
+
 		return currentPlaying
 	}
 
@@ -84,7 +86,7 @@ export class YTMPlayerStore {
 	get activeTrack(): YTMTrack | null {
 		const state = ytmStore.state
 		if (!state?.video) return null
-		
+
 		const thumbnailUrl = getHighestQualityThumbnail(state.video.thumbnails)
 		const basicTrack: YTMTrack = {
 			title: state.video.title,
@@ -93,31 +95,33 @@ export class YTMPlayerStore {
 			duration: state.video.durationSeconds,
 			thumbnail: thumbnailUrl,
 			id: state.video.id,
-			url: `https://music.youtube.com/watch?v=${state.video.id}`
+			url: `https://music.youtube.com/watch?v=${state.video.id}`,
 		}
-		
+
 		// If we have a cached track with the same ID and thumbnail, return it (with color)
-		if (this.#currentTrackWithColor?.id === basicTrack.id && 
-		    this.#currentTrackWithColor?.thumbnail === basicTrack.thumbnail) {
+		if (
+			this.#currentTrackWithColor?.id === basicTrack.id &&
+			this.#currentTrackWithColor?.thumbnail === basicTrack.thumbnail
+		) {
 			return this.#currentTrackWithColor
 		}
-		
+
 		// Otherwise, start color extraction in the background and return basic track for now
 		this.#extractColorForTrack(basicTrack)
 		return basicTrack
 	}
-	
+
 	async #extractColorForTrack(track: YTMTrack): Promise<void> {
 		if (!track.thumbnail) return
-		
+
 		try {
 			const primaryColor = await extractColorFromImageUrl(track.thumbnail)
-			
+
 			// Only update if this is still the current track
 			if (ytmStore.state?.video?.id === track.id) {
 				this.#currentTrackWithColor = {
 					...track,
-					primaryColor
+					primaryColor,
 				}
 			}
 		} catch (error) {
@@ -127,14 +131,14 @@ export class YTMPlayerStore {
 
 	get queue(): YTMTrack[] {
 		const queueItems = ytmStore.state?.player?.queue?.items || []
-		return queueItems.map(item => ({
+		return queueItems.map((item) => ({
 			title: item.title,
 			artists: [item.author],
 			album: '', // Queue items don't have album info
 			duration: 0, // Duration is string format, would need parsing
 			thumbnail: getHighestQualityThumbnail(item.thumbnails),
 			id: item.videoId,
-			url: `https://music.youtube.com/watch?v=${item.videoId}`
+			url: `https://music.youtube.com/watch?v=${item.videoId}`,
 		}))
 	}
 
@@ -146,10 +150,14 @@ export class YTMPlayerStore {
 	get repeat(): PlayerRepeat {
 		const ytmRepeatMode = ytmStore.state?.player?.queue?.repeatMode
 		switch (ytmRepeatMode) {
-			case 0: return 'none'  // No repeat
-			case 1: return 'all'   // Repeat all
-			case 2: return 'one'   // Repeat one
-			default: return 'none'
+			case 0:
+				return 'none' // No repeat
+			case 1:
+				return 'all' // Repeat all
+			case 2:
+				return 'one' // Repeat one
+			default:
+				return 'none'
 		}
 	}
 
@@ -206,19 +214,21 @@ export class YTMPlayerStore {
 				title: track.title,
 				artist: track.artists.join(', '),
 				album: track.album || 'Unknown Album',
-				artwork: track.thumbnail ? [
-					{
-						src: track.thumbnail,
-						sizes: '512x512',
-						type: 'image/jpeg',
-					},
-				] : [
-					{
-						src: new URL('/artwork.svg', location.origin).toString(),
-						sizes: '512x512',
-						type: 'image/svg+xml',
-					}
-				],
+				artwork: track.thumbnail
+					? [
+							{
+								src: track.thumbnail,
+								sizes: '512x512',
+								type: 'image/jpeg',
+							},
+						]
+					: [
+							{
+								src: new URL('/artwork.svg', location.origin).toString(),
+								sizes: '512x512',
+								type: 'image/svg+xml',
+							},
+						],
 			})
 		})
 
@@ -256,7 +266,7 @@ export class YTMPlayerStore {
 		if (force !== undefined) {
 			const shouldPlay = force
 			const isCurrentlyPlaying = this.playing
-			
+
 			// Only toggle if the desired state is different from current state
 			if (shouldPlay !== isCurrentlyPlaying) {
 				await ytmStore.togglePlayPause()
@@ -279,14 +289,14 @@ export class YTMPlayerStore {
 
 	seek = async (time: number): Promise<void> => {
 		if (!ytmStore.isConnected) return
-		
+
 		// Store current stable state before seeking
 		this.#lastStablePlayingState = ytmStore.state?.player?.trackState === 1
 		this.#seeking = true
-		
+
 		try {
 			await ytmStore.seek(time)
-			
+
 			// Clear seeking state after a brief delay to allow YTM to stabilize
 			setTimeout(() => {
 				this.#seeking = false
@@ -325,7 +335,7 @@ export class YTMPlayerStore {
 			this.#muted = false
 			// Send unmute command to YTM
 			if (ytmStore.isConnected) {
-				ytmStore.unmute().catch(error => {
+				ytmStore.unmute().catch((error) => {
 					console.warn('Failed to unmute:', error)
 				})
 			}
@@ -361,7 +371,7 @@ export class YTMPlayerStore {
 			// Restore previous volume
 			this.#volume = this.#volumeBeforeMute
 			// Sync with YTM
-			ytmStore.setVolume(this.#volume).catch(error => {
+			ytmStore.setVolume(this.#volume).catch((error) => {
 				console.warn('Failed to restore volume:', error)
 			})
 		} else {
@@ -384,7 +394,6 @@ export class YTMPlayerStore {
 		this.#muted = false
 	}
 
-
 	likeTrack = async (): Promise<void> => {
 		if (!ytmStore.isConnected) return
 		await ytmStore.likeTrack()
@@ -405,14 +414,17 @@ export class YTMPlayerStore {
 		console.log('[YTMPlayer] Starting auto-connect...')
 		// Check if there's an existing connection stored
 		const existingConnection = ytmStore.getCurrentConnection()
-		
+
 		console.log('[YTMPlayer] Checking existing connection:', existingConnection)
-		
+
 		if (existingConnection?.token && ytmStore.isTokenValid()) {
 			console.log('[YTMPlayer] Found valid existing token, attempting silent reconnect...')
 			try {
 				// Use the store's connect method which will handle the auto-reconnect path
-				const success = await ytmStore.connect(existingConnection.host, existingConnection.port)
+				const success = await ytmStore.connect(
+					existingConnection.host,
+					existingConnection.port,
+				)
 				if (success) {
 					console.log('[YTMPlayer] Auto-reconnect successful')
 				} else {
@@ -446,15 +458,21 @@ export class YTMPlayerStore {
 
 	// Legacy compatibility methods (for existing UI)
 	playTrack = (): void => {
-		console.warn('playTrack not implemented for YTM - use YTM Desktop interface to select tracks')
+		console.warn(
+			'playTrack not implemented for YTM - use YTM Desktop interface to select tracks',
+		)
 	}
 
 	addToQueue = (): void => {
-		console.warn('addToQueue not implemented for YTM - use YTM Desktop interface to manage queue')
+		console.warn(
+			'addToQueue not implemented for YTM - use YTM Desktop interface to manage queue',
+		)
 	}
 
 	clearQueue = (): void => {
-		console.warn('clearQueue not implemented for YTM - use YTM Desktop interface to manage queue')
+		console.warn(
+			'clearQueue not implemented for YTM - use YTM Desktop interface to manage queue',
+		)
 	}
 
 	reset = (): void => {

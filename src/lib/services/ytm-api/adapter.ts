@@ -1,9 +1,9 @@
-import type { YTMTrack, YTMPlaylist, YTMPlayerState } from './types.js'
-import type { Track, Album, Artist, Playlist, ParsedTrackData } from '$lib/library/types.ts'
+import type { Album, Artist, ParsedTrackData, Playlist, Track } from '$lib/library/types.ts'
+import type { YTMPlayerState, YTMPlaylist, YTMTrack } from './types.js'
 
 export function adaptYTMTrackToTrack(ytmTrack: YTMTrack): Track {
 	return {
-		id: parseInt(ytmTrack.id) || Math.floor(Math.random() * 1000000),
+		id: Number.parseInt(ytmTrack.id) || Math.floor(Math.random() * 1000000),
 		uuid: ytmTrack.id,
 		name: ytmTrack.title,
 		album: ytmTrack.album || '~\0unknown',
@@ -16,17 +16,17 @@ export function adaptYTMTrackToTrack(ytmTrack: YTMTrack): Track {
 		file: null, // YTM tracks don't have local files
 		scannedAt: Date.now(),
 		fileName: ytmTrack.title,
-		directory: -2 // Special ID for YTM tracks
+		directory: -2, // Special ID for YTM tracks
 	}
 }
 
 export function adaptYTMPlaylistToPlaylist(ytmPlaylist: YTMPlaylist): Playlist {
 	return {
-		id: parseInt(ytmPlaylist.id) || Math.floor(Math.random() * 1000000),
+		id: Number.parseInt(ytmPlaylist.id) || Math.floor(Math.random() * 1000000),
 		uuid: ytmPlaylist.id,
 		name: ytmPlaylist.title,
 		description: `${ytmPlaylist.trackCount} tracks${ytmPlaylist.author ? ` • ${ytmPlaylist.author}` : ''}`,
-		createdAt: Date.now()
+		createdAt: Date.now(),
 	}
 }
 
@@ -44,7 +44,7 @@ export function extractAlbumsFromYTMTracks(tracks: YTMTrack[]): Album[] {
 				name: track.album,
 				artists: track.author ? [track.author] : [],
 				year: undefined,
-				image: undefined // Could fetch from thumbnail if needed
+				image: undefined, // Could fetch from thumbnail if needed
 			})
 		}
 	}
@@ -54,30 +54,27 @@ export function extractAlbumsFromYTMTracks(tracks: YTMTrack[]): Album[] {
 
 export function extractArtistsFromYTMTracks(tracks: YTMTrack[]): Artist[] {
 	const artistsSet = new Set<string>()
-	
+
 	for (const track of tracks) {
 		if (track.author) {
 			artistsSet.add(track.author)
 		}
 	}
 
-	return Array.from(artistsSet).map(artist => ({
+	return Array.from(artistsSet).map((artist) => ({
 		id: Math.floor(Math.random() * 1000000),
 		uuid: artist,
-		name: artist
+		name: artist,
 	}))
 }
 
 export function createYTMCompatibleData(state: YTMPlayerState, playlists: YTMPlaylist[]) {
-	const allTracks = [
-		...(state.track ? [state.track] : []),
-		...state.queue
-	]
+	const allTracks = [...(state.track ? [state.track] : []), ...state.queue]
 
 	return {
 		tracks: allTracks.map(adaptYTMTrackToTrack),
 		albums: extractAlbumsFromYTMTracks(allTracks),
 		artists: extractArtistsFromYTMTracks(allTracks),
-		playlists: playlists.map(adaptYTMPlaylistToPlaylist)
+		playlists: playlists.map(adaptYTMPlaylistToPlaylist),
 	}
 }

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import PlayPauseIcon from '$lib/components/animated-icons/PlayPauseIcon.svelte'
-	import IconButton from '../../IconButton.svelte'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import * as m from '$paraglide/messages.js'
+	import IconButton from '../../IconButton.svelte'
 
 	const player = usePlayer()
 </script>

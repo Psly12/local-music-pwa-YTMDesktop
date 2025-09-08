@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import Button from './Button.svelte'
-	import Icon from './icon/Icon.svelte'
 	import IconButton from './IconButton.svelte'
+	import Icon from './icon/Icon.svelte'
 	import LikeButton from './player/buttons/LikeButton.svelte'
 	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
 	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'

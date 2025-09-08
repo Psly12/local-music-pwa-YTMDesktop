@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte'
 	import { logger } from '$lib/helpers/logger.ts'
+
 	
 	interface Props {
 		children: Snippet

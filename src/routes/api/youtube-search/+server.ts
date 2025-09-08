@@ -26,53 +26,52 @@ interface YouTubeSearchResponse {
 	items: YouTubeSearchItem[]
 	nextPage?: {
 		nextPageToken: string
-		nextPageContext: any
+		nextPageContext: unknown
 	}
 }
 
 export const GET: RequestHandler = async ({ url }) => {
 	const query = url.searchParams.get('q')
-	const limit = parseInt(url.searchParams.get('limit') || '20')
-	
+	const limit = Number.parseInt(url.searchParams.get('limit') || '20', 10)
+
 	if (!query) {
 		return json({ error: 'Query parameter "q" is required' }, { status: 400 })
 	}
 
 	try {
-		console.log(`[YouTube Search API] Searching for: "${query}"`)
-		
 		// Search for videos and playlists
-		const results = await youtubesearchapi.GetListByKeyword(
+		const results = (await youtubesearchapi.GetListByKeyword(
 			query,
 			false, // not playlist search
 			limit,
-			[{ type: 'video' }] // filter for videos only
-		) as YouTubeSearchResponse
-
-		console.log(`[YouTube Search API] Found ${results.items?.length || 0} results`)
+			[{ type: 'video' }], // filter for videos only
+		)) as YouTubeSearchResponse
 
 		// Transform results to match our expected format
-		const transformedResults = results.items?.map(item => ({
-			type: item.type,
-			videoId: item.id,
-			title: item.title,
-			artist: item.channelTitle,
-			duration: item.lengthText || item.duration?.text,
-			thumbnails: item.thumbnail?.thumbnails || [],
-			isLive: item.isLive || false,
-			viewCount: item.viewCountText
-		})) || []
+		const transformedResults =
+			results.items?.map((item) => ({
+				type: item.type,
+				videoId: item.id,
+				title: item.title,
+				artist: item.channelTitle,
+				duration: item.lengthText || item.duration?.text,
+				thumbnails: item.thumbnail?.thumbnails || [],
+				isLive: item.isLive,
+				viewCount: item.viewCountText,
+			})) || []
 
 		return json({
 			results: transformedResults,
-			continuation: results.nextPage?.nextPageToken
+			continuation: results.nextPage?.nextPageToken,
 		})
-		
 	} catch (error) {
 		console.error('[YouTube Search API] Search failed:', error)
 		return json(
-			{ error: 'Search failed', details: error instanceof Error ? error.message : 'Unknown error' },
-			{ status: 500 }
+			{
+				error: 'Search failed',
+				details: error instanceof Error ? error.message : 'Unknown error',
+			},
+			{ status: 500 },
 		)
 	}
 }

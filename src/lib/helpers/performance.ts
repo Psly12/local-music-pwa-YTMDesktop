@@ -22,7 +22,7 @@ export const monitorMemoryUsage = () => {
 					used: `${used}MB`,
 					total: `${total}MB`,
 					limit: `${limit}MB`,
-					percentage: `${Math.round((used / limit) * 100)}%`
+					percentage: `${Math.round((used / limit) * 100)}%`,
 				})
 			}
 		}
@@ -40,7 +40,7 @@ export const reportWebVitals = (metric: any) => {
 			logger.info('Web Vital', {
 				name: metric.name,
 				value: metric.value,
-				rating: metric.rating
+				rating: metric.rating,
 			})
 		}
 	}
@@ -50,7 +50,7 @@ export const reportWebVitals = (metric: any) => {
 export const debounce = <T extends (...args: any[]) => void>(
 	func: T,
 	wait: number,
-	immediate = false
+	immediate = false,
 ): ((...args: Parameters<T>) => void) => {
 	let timeout: number | undefined
 
@@ -71,7 +71,7 @@ export const debounce = <T extends (...args: any[]) => void>(
 // Throttle utility for performance optimization
 export const throttle = <T extends (...args: any[]) => void>(
 	func: T,
-	limit: number
+	limit: number,
 ): ((...args: Parameters<T>) => void) => {
 	let inThrottle: boolean
 

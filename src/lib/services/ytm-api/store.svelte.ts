@@ -1,17 +1,25 @@
-import { YTMAPIClient } from './client.js'
-import type { YTMPlayerState, YTMPlaylist, YTMConnection, YTMTrack, YTMSearchResponse } from './types.js'
 import { logger } from '$lib/helpers/logger.ts'
+import { YTMAPIClient } from './client.js'
+import type {
+	YTMConnection,
+	YTMPlayerState,
+	YTMPlaylist,
+	YTMSearchResponse,
+	YTMTrack,
+} from './types.js'
 
 // Utility function to get the highest quality thumbnail from YTM thumbnails array
-function getHighestQualityThumbnail(thumbnails?: Array<{ url: string; width?: number; height?: number }>): string {
+function getHighestQualityThumbnail(
+	thumbnails?: Array<{ url: string; width?: number; height?: number }>,
+): string {
 	if (!thumbnails || thumbnails.length === 0) return ''
-	
+
 	const highestQuality = thumbnails.reduce((best, current) => {
 		const bestSize = (best.width || 0) * (best.height || 0)
 		const currentSize = (current.width || 0) * (current.height || 0)
 		return currentSize > bestSize ? current : best
 	}, thumbnails[0])
-	
+
 	return highestQuality.url
 }
 
@@ -27,7 +35,7 @@ class YTMStore {
 	constructor() {
 		const connection = this.client.getCurrentConnection()
 		if (connection?.token) {
-			this.connected = connection.connected || false
+			this.connected = connection.connected
 		}
 	}
 
@@ -54,7 +62,7 @@ class YTMStore {
 	get currentTrack(): YTMTrack | null {
 		const state = this.playerState
 		if (!state?.video) return null
-		
+
 		return {
 			title: state.video.title,
 			artists: [state.video.author],
@@ -62,7 +70,7 @@ class YTMStore {
 			duration: state.video.durationSeconds,
 			thumbnail: getHighestQualityThumbnail(state.video.thumbnails),
 			id: state.video.id,
-			url: `https://music.youtube.com/watch?v=${state.video.id}`
+			url: `https://music.youtube.com/watch?v=${state.video.id}`,
 		}
 	}
 
@@ -93,11 +101,13 @@ class YTMStore {
 			logger.ytm.info('MANUAL CONNECT: About to make HEAD request to test reachability')
 			const testResponse = await fetch(`http://${host}:${port}/api/v1/state`, {
 				method: 'HEAD',
-				mode: 'cors'
-			}).catch(e => {
+				mode: 'cors',
+			}).catch((e) => {
 				logger.ytm.error('YTM Desktop not reachable', e, { host, port })
 				logger.ytm.error('MANUAL CONNECT: HEAD request failed with error:', e)
-				throw new Error(`YouTube Music Desktop is not running or not accessible at ${host}:${port}. Please ensure YTM Desktop is installed, running, and has the "Remote Control API" enabled in Settings → Integrations.`)
+				throw new Error(
+					`YouTube Music Desktop is not running or not accessible at ${host}:${port}. Please ensure YTM Desktop is installed, running, and has the "Remote Control API" enabled in Settings → Integrations.`,
+				)
 			})
 
 			logger.ytm.debug('YTM Desktop is reachable', { host, port })
@@ -106,8 +116,13 @@ class YTMStore {
 			// First try to connect with existing token if available
 			const existingConnection = this.client.getCurrentConnection()
 			logger.ytm.debug('Checking existing connection', { existingConnection })
-			
-			if (existingConnection?.token && existingConnection.host === host && existingConnection.port === port && this.client.isTokenValid()) {
+
+			if (
+				existingConnection?.token &&
+				existingConnection.host === host &&
+				existingConnection.port === port &&
+				this.client.isTokenValid()
+			) {
 				logger.ytm.debug('Using existing valid token, testing connection...')
 				logger.ytm.info('AUTO-CONNECT PATH: Found existing valid token, skipping auth flow')
 				try {
@@ -115,36 +130,49 @@ class YTMStore {
 					await this.client.getPlayerState()
 					logger.ytm.info('Existing token is valid, connecting socket...')
 					logger.ytm.info('AUTO-CONNECT PATH: Token verification succeeded')
-					
+
 					// Set connected state immediately for UI feedback
 					this.connected = true
 					this.error = null
-					
+
 					await this.connectSocket()
 					await this.loadInitialData()
 					this.connecting = false
 					return true
 				} catch (tokenError) {
-					logger.ytm.warn('Existing token is invalid, clearing and requesting new auth...', tokenError)
-					logger.ytm.warn('AUTO-CONNECT PATH: Token verification failed, falling back to auth flow')
+					logger.ytm.warn(
+						'Existing token is invalid, clearing and requesting new auth...',
+						tokenError,
+					)
+					logger.ytm.warn(
+						'AUTO-CONNECT PATH: Token verification failed, falling back to auth flow',
+					)
 					this.client.clearConnection()
 				}
 			} else if (existingConnection?.token) {
 				logger.ytm.warn('Existing token is expired or for different host, clearing...')
-				logger.ytm.warn('TOKEN MISMATCH: Clearing existing connection due to host/port/expiry mismatch')
+				logger.ytm.warn(
+					'TOKEN MISMATCH: Clearing existing connection due to host/port/expiry mismatch',
+				)
 				this.client.clearConnection()
 			}
 
 			logger.ytm.info('Requesting new auth code...')
 			logger.ytm.info('AUTH FLOW PATH: Starting fresh authentication flow')
 			// Request authentication with correct protocol
-			const code = await this.client.requestAuthCode({
-				appId: 'localmusicpwa',  // Must be lowercase alphanumeric, 2-32 chars
-				appName: 'Local Music PWA',
-				appVersion: '1.0.0'
-			}, host, port)
+			const code = await this.client.requestAuthCode(
+				{
+					appId: 'localmusicpwa', // Must be lowercase alphanumeric, 2-32 chars
+					appName: 'Local Music PWA',
+					appVersion: '1.0.0',
+				},
+				host,
+				port,
+			)
 
-			logger.ytm.info(`Auth code received: ${code}. Please approve the connection in YouTube Music Desktop within 30 seconds.`)
+			logger.ytm.info(
+				`Auth code received: ${code}. Please approve the connection in YouTube Music Desktop within 30 seconds.`,
+			)
 
 			// Enhanced waiting with progress indication
 			logger.ytm.debug('Waiting for user approval with enhanced retry logic...')
@@ -153,22 +181,28 @@ class YTMStore {
 			const maxAttempts = 6 // 30 seconds total
 
 			while (!approved && attempts < maxAttempts) {
-				await new Promise(resolve => setTimeout(resolve, 5000))
+				await new Promise((resolve) => setTimeout(resolve, 5000))
 				attempts++
-				
+
 				try {
 					logger.ytm.debug(`Attempting token exchange (${attempts}/${maxAttempts})...`)
-					const token = await this.client.exchangeToken({
-						appId: 'localmusicpwa',  // Must match the requestcode appId
-						code
-					}, host, port)
-					
+					const token = await this.client.exchangeToken(
+						{
+							appId: 'localmusicpwa', // Must match the requestcode appId
+							code,
+						},
+						host,
+						port,
+					)
+
 					logger.ytm.info('Token received successfully!')
 					approved = true
 					break
 				} catch (exchangeError) {
 					if (attempts < maxAttempts) {
-						logger.ytm.debug(`Token exchange failed, retrying... (${attempts}/${maxAttempts})`)
+						logger.ytm.debug(
+							`Token exchange failed, retrying... (${attempts}/${maxAttempts})`,
+						)
 					} else {
 						throw exchangeError
 					}
@@ -176,15 +210,17 @@ class YTMStore {
 			}
 
 			if (!approved) {
-				throw new Error('User did not approve the connection request within 30 seconds. Please try again.')
+				throw new Error(
+					'User did not approve the connection request within 30 seconds. Please try again.',
+				)
 			}
 
 			logger.ytm.info('Establishing enhanced socket connection...')
-			
+
 			// Set connected state immediately for UI feedback
 			this.connected = true
 			this.error = null
-			
+
 			await this.connectSocket()
 			await this.loadInitialData()
 
@@ -207,9 +243,7 @@ class YTMStore {
 			(connected: boolean) => {
 				logger.ytm.debug('Connection status changed', { connected })
 				this.connected = connected
-				if (!connected) {
-					this.error = 'Lost connection to YouTube Music Desktop'
-				} else {
+				if (connected) {
 					// When socket connects, only load initial data if not already loaded/loading
 					if (!this.loadingInitialData && this.playlists.length === 0) {
 						logger.ytm.info('Socket connected, loading initial data...')
@@ -217,12 +251,14 @@ class YTMStore {
 					} else {
 						logger.ytm.info('Socket connected, initial data already loaded/loading')
 					}
+				} else {
+					this.error = 'Lost connection to YouTube Music Desktop'
 				}
-			}
+			},
 		)
 
 		// Wait a moment for connection to establish
-		await new Promise(resolve => setTimeout(resolve, 1000))
+		await new Promise((resolve) => setTimeout(resolve, 1000))
 	}
 
 	private async loadInitialData(): Promise<void> {
@@ -233,7 +269,7 @@ class YTMStore {
 		}
 
 		this.loadingInitialData = true
-		
+
 		try {
 			console.log('[YTM Store] Loading initial data...')
 			// Only load playlists via REST API, state will come via socket
@@ -241,12 +277,12 @@ class YTMStore {
 
 			console.log('[YTM Store] Received playlists:', playlists)
 			this.playlists = playlists
-			
+
 			// State will be updated via Socket.IO 'state-update' events
 			console.log('[YTM Store] Initial data loaded, waiting for state updates via socket...')
 		} catch (error) {
 			console.error('[YTM Store] Failed to load initial data:', error)
-			
+
 			// Handle rate limiting more gracefully
 			if (error instanceof Error && error.message.includes('429')) {
 				console.warn('[YTM Store] Rate limited, will retry playlists later...')
@@ -380,7 +416,7 @@ class YTMStore {
 		return this.client.getTokenExpiryTime()
 	}
 
-	getConnectionHealth(): { 
+	getConnectionHealth(): {
 		connected: boolean
 		tokenValid: boolean
 		expiryTime: number | null
@@ -391,24 +427,26 @@ class YTMStore {
 			connected: this.isConnected,
 			tokenValid: this.isTokenValid(),
 			expiryTime,
-			timeUntilExpiry: expiryTime ? expiryTime - Date.now() : null
+			timeUntilExpiry: expiryTime ? expiryTime - Date.now() : null,
 		}
 	}
 
 	async searchVideos(query: string): Promise<YTMSearchResponse | null> {
 		try {
 			console.log(`[YTM Store] Searching YouTube for: ${query}`)
-			
+
 			// Use our server-side YouTube search API
-			const response = await fetch(`/api/youtube-search?q=${encodeURIComponent(query)}&limit=20`)
-			
+			const response = await fetch(
+				`/api/youtube-search?q=${encodeURIComponent(query)}&limit=20`,
+			)
+
 			if (!response.ok) {
 				throw new Error(`YouTube search failed: ${response.status} ${response.statusText}`)
 			}
-			
+
 			const data = await response.json()
 			console.log('[YTM Store] YouTube search response:', data)
-			
+
 			return data as YTMSearchResponse
 		} catch (error) {
 			console.error('[YTM Store] YouTube search failed:', error)
@@ -421,7 +459,7 @@ class YTMStore {
 			console.warn('[YTM Store] Cannot play video - not connected')
 			return
 		}
-		
+
 		try {
 			console.log(`[YTM Store] Playing video: ${videoId}`)
 			await this.client.sendCommand('changeVideo', { videoId })
@@ -436,12 +474,13 @@ class YTMStore {
 			console.warn('[YTM Store] Cannot add to queue - not connected')
 			return
 		}
-		
+
 		try {
-			console.log(`[YTM Store] Adding video to queue: ${videoId}`, position ? `at position ${position}` : '')
-			const commandData = position !== undefined 
-				? { videoId, position }
-				: { videoId }
+			console.log(
+				`[YTM Store] Adding video to queue: ${videoId}`,
+				position ? `at position ${position}` : '',
+			)
+			const commandData = position !== undefined ? { videoId, position } : { videoId }
 			await this.client.sendCommand('addSongToQueue', commandData)
 			console.log('[YTM Store] Video added to queue successfully')
 		} catch (error) {

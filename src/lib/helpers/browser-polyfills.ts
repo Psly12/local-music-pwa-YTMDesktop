@@ -7,7 +7,7 @@ if (!('locks' in navigator)) {
 	;(navigator as any).locks = {
 		request: (name: string, callback: () => Promise<any>) => {
 			return callback()
-		}
+		},
 	}
 }
 
@@ -22,11 +22,11 @@ if (!('timeout' in AbortSignal)) {
 
 // crypto.randomUUID polyfill for older browsers
 if (!('randomUUID' in crypto)) {
-	;(crypto as any).randomUUID = function() {
+	;(crypto as any).randomUUID = () => {
 		// Simple UUID v4 implementation
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-			const r = Math.random() * 16 | 0
-			const v = c == 'x' ? r : (r & 0x3 | 0x8)
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+			const r = (Math.random() * 16) | 0
+			const v = c == 'x' ? r : (r & 0x3) | 0x8
 			return v.toString(16)
 		})
 	}

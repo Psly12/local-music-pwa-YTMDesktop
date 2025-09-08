@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { usePlayer } from '$lib/stores/player/use-store.ts'
-	import type { YTMSearchResult } from '$lib/services/ytm-api'
-	import Icon from '$lib/components/icon/Icon.svelte'
+	
 	import Button from '$lib/components/Button.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
+	import type { YTMSearchResult } from '$lib/services/ytm-api'
+import { usePlayer } from '$lib/stores/player/use-store.ts'
 
 	const player = usePlayer()
 	

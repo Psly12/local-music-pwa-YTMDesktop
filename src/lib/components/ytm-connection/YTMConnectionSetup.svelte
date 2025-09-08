@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
-	import TextField from '$lib/components/TextField.svelte'
 	import Switch from '$lib/components/Switch.svelte'
-	import { ytmStore } from '$lib/services/ytm-api'
+	import TextField from '$lib/components/TextField.svelte'
 	import type { YTMConnection } from '$lib/services/ytm-api'
+	import { ytmStore } from '$lib/services/ytm-api'
 
 	interface Props {
 		onConnectionChange?: (connected: boolean) => void
@@ -54,7 +54,7 @@
 		
 		// Use saved host if available, otherwise keep the default from getDefaultHost()
 		if (savedHost) host = savedHost
-		if (savedPort) port = parseInt(savedPort, 10) || 9863
+		if (savedPort) port = Number.parseInt(savedPort, 10) || 9863
 		if (savedEnableYTM) enableYTM = savedEnableYTM === 'true'
 		
 		console.log('[YTMConnectionSetup] Set initial values:', { host, port, enableYTM })
@@ -124,7 +124,7 @@
 		
 		// Use DOM values if they differ from state (binding issue detection)
 		const formHostValue = hostInput?.value || host
-		const formPortValue = portInput?.value ? parseInt(portInput.value, 10) : port
+		const formPortValue = portInput?.value ? Number.parseInt(portInput.value, 10) : port
 		
 		// Ensure we have the latest values from the form
 		const currentHost = (formHostValue || '').trim() || '127.0.0.1'

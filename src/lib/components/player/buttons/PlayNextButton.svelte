@@ -1,9 +1,10 @@
 <script lang="ts">
-	import PlayPreviousNextIcon from '../../animated-icons/PlayPreviousNextIcon.svelte'
-	import IconButton from '../../IconButton.svelte'
+	
+	import type { ClassValue } from 'clsx'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import * as m from '$paraglide/messages.js'
-	import type { ClassValue } from 'clsx'
+import PlayPreviousNextIcon from '../../animated-icons/PlayPreviousNextIcon.svelte'
+	import IconButton from '../../IconButton.svelte'
 
 	const { class: className }: { class?: ClassValue } = $props()
 

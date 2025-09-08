@@ -10,7 +10,7 @@ const safeLocalStorage = {
 			return null
 		}
 	},
-	
+
 	setItem(key: string, value: string): boolean {
 		try {
 			localStorage.setItem(key, value)
@@ -20,10 +20,12 @@ const safeLocalStorage = {
 				logger.warn('localStorage quota exceeded', error, { key })
 				// Try to clear some old data
 				try {
-					const keys = Object.keys(localStorage).filter(k => k.startsWith('snaeplayer-'))
+					const keys = Object.keys(localStorage).filter((k) =>
+						k.startsWith('snaeplayer-'),
+					)
 					if (keys.length > 10) {
 						// Remove oldest entries (this is a simple strategy)
-						keys.slice(0, 5).forEach(k => {
+						keys.slice(0, 5).forEach((k) => {
 							try {
 								localStorage.removeItem(k)
 							} catch {}
@@ -37,7 +39,7 @@ const safeLocalStorage = {
 			logger.warn('Failed to write to localStorage', error, { key })
 			return false
 		}
-	}
+	},
 }
 
 export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): void => {
@@ -69,10 +71,16 @@ export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): v
 				try {
 					const success = safeLocalStorage.setItem(fullKey, JSON.stringify(updatedValue))
 					if (!success) {
-						logger.warn('Failed to persist value', undefined, { storeName, key: String(key) })
+						logger.warn('Failed to persist value', undefined, {
+							storeName,
+							key: String(key),
+						})
 					}
 				} catch (error) {
-					logger.warn('Failed to serialize value for persistence', error, { storeName, key: String(key) })
+					logger.warn('Failed to serialize value for persistence', error, {
+						storeName,
+						key: String(key),
+					})
 				}
 			})
 		})

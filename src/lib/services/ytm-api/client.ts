@@ -2,12 +2,12 @@ import { io, type Socket } from 'socket.io-client'
 import type {
 	YTMAuthRequest,
 	YTMAuthResponse,
-	YTMTokenRequest,
-	YTMTokenResponse,
+	YTMCommandData,
+	YTMConnection,
 	YTMPlayerState,
 	YTMPlaylist,
-	YTMConnection,
-	YTMCommandData
+	YTMTokenRequest,
+	YTMTokenResponse,
 } from './types.js'
 
 export class YTMAPIClient {
@@ -27,20 +27,26 @@ export class YTMAPIClient {
 		this.startHealthCheck()
 	}
 
-	private getBaseUrl(host: string = '127.0.0.1', port: number = 9863): string {
+	private getBaseUrl(host = '127.0.0.1', port = 9863): string {
 		// YTM Desktop API always runs on HTTP, regardless of the host page protocol
 		const protocol = 'http'
-		
+
 		return `${protocol}://${host}:${port}/api/v1`
 	}
 
-	private async fetchAPI<T>(endpoint: string, options?: RequestInit, host?: string, port?: number, retryCount = 0): Promise<T> {
+	private async fetchAPI<T>(
+		endpoint: string,
+		options?: RequestInit,
+		host?: string,
+		port?: number,
+		retryCount = 0,
+	): Promise<T> {
 		const baseUrl = this.getBaseUrl(host, port)
 		const url = `${baseUrl}${endpoint}`
 
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json',
-			...options?.headers as Record<string, string>
+			...(options?.headers as Record<string, string>),
 		}
 
 		if (this.connection?.token) {
@@ -51,7 +57,7 @@ export class YTMAPIClient {
 			const response = await fetch(url, {
 				...options,
 				headers,
-				timeout: 10000 // 10 second timeout
+				timeout: 10000, // 10 second timeout
 			})
 
 			if (!response.ok) {
@@ -59,12 +65,16 @@ export class YTMAPIClient {
 				if (response.status === 401 || response.status === 403) {
 					console.warn('[YTM Client] Token may have expired, clearing connection')
 					this.clearConnection()
-					throw new Error('Authentication failed. Please reconnect to YouTube Music Desktop.')
+					throw new Error(
+						'Authentication failed. Please reconnect to YouTube Music Desktop.',
+					)
 				}
 
 				// Handle server errors with retry
 				if (response.status >= 500 && retryCount < 3) {
-					console.warn(`[YTM Client] Server error ${response.status}, retrying... (${retryCount + 1}/3)`)
+					console.warn(
+						`[YTM Client] Server error ${response.status}, retrying... (${retryCount + 1}/3)`,
+					)
 					await this.delay(1000 * (retryCount + 1))
 					return this.fetchAPI(endpoint, options, host, port, retryCount + 1)
 				}
@@ -81,7 +91,7 @@ export class YTMAPIClient {
 			if (!text.trim()) {
 				return null // Empty response is OK for some commands
 			}
-			
+
 			try {
 				return JSON.parse(text)
 			} catch (jsonError) {
@@ -91,7 +101,10 @@ export class YTMAPIClient {
 		} catch (error) {
 			// Handle network errors with retry
 			if (retryCount < 3 && (error instanceof TypeError || error.message.includes('fetch'))) {
-				console.warn(`[YTM Client] Network error, retrying... (${retryCount + 1}/3)`, error.message)
+				console.warn(
+					`[YTM Client] Network error, retrying... (${retryCount + 1}/3)`,
+					error.message,
+				)
 				await this.delay(1000 * (retryCount + 1))
 				return this.fetchAPI(endpoint, options, host, port, retryCount + 1)
 			}
@@ -100,33 +113,51 @@ export class YTMAPIClient {
 	}
 
 	private delay(ms: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, ms))
+		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
 
-	async requestAuthCode(request: YTMAuthRequest, host = '127.0.0.1', port = 9863): Promise<string> {
-		const response = await this.fetchAPI<YTMAuthResponse>('/auth/requestcode', {
-			method: 'POST',
-			body: JSON.stringify(request)
-		}, host, port)
+	async requestAuthCode(
+		request: YTMAuthRequest,
+		host = '127.0.0.1',
+		port = 9863,
+	): Promise<string> {
+		const response = await this.fetchAPI<YTMAuthResponse>(
+			'/auth/requestcode',
+			{
+				method: 'POST',
+				body: JSON.stringify(request),
+			},
+			host,
+			port,
+		)
 
 		return response.code
 	}
 
-	async exchangeToken(request: YTMTokenRequest, host = '127.0.0.1', port = 9863): Promise<string> {
-		const response = await this.fetchAPI<YTMTokenResponse>('/auth/request', {
-			method: 'POST',
-			body: JSON.stringify(request)
-		}, host, port)
+	async exchangeToken(
+		request: YTMTokenRequest,
+		host = '127.0.0.1',
+		port = 9863,
+	): Promise<string> {
+		const response = await this.fetchAPI<YTMTokenResponse>(
+			'/auth/request',
+			{
+				method: 'POST',
+				body: JSON.stringify(request),
+			},
+			host,
+			port,
+		)
 
 		// Set token expiry time (YTM Desktop tokens typically last 24 hours)
-		this.tokenExpiryTime = Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
+		this.tokenExpiryTime = Date.now() + 24 * 60 * 60 * 1000 // 24 hours from now
 
 		this.connection = {
 			host,
 			port,
 			token: response.token,
 			connected: false,
-			tokenExpiryTime: this.tokenExpiryTime
+			tokenExpiryTime: this.tokenExpiryTime,
 		}
 
 		this.saveConnection()
@@ -138,7 +169,12 @@ export class YTMAPIClient {
 			throw new Error('Not authenticated')
 		}
 
-		return this.fetchAPI<YTMPlayerState>('/state', undefined, this.connection.host, this.connection.port)
+		return this.fetchAPI<YTMPlayerState>(
+			'/state',
+			undefined,
+			this.connection.host,
+			this.connection.port,
+		)
 	}
 
 	async getPlaylists(): Promise<YTMPlaylist[]> {
@@ -146,7 +182,12 @@ export class YTMAPIClient {
 			throw new Error('Not authenticated')
 		}
 
-		return this.fetchAPI<YTMPlaylist[]>('/playlists', undefined, this.connection.host, this.connection.port)
+		return this.fetchAPI<YTMPlaylist[]>(
+			'/playlists',
+			undefined,
+			this.connection.host,
+			this.connection.port,
+		)
 	}
 
 	async sendCommand(command: string, data?: YTMCommandData): Promise<void> {
@@ -155,14 +196,22 @@ export class YTMAPIClient {
 		}
 
 		const body = data !== undefined ? { command, data } : { command }
-		
-		await this.fetchAPI('/command', {
-			method: 'POST',
-			body: JSON.stringify(body)
-		}, this.connection.host, this.connection.port)
+
+		await this.fetchAPI(
+			'/command',
+			{
+				method: 'POST',
+				body: JSON.stringify(body),
+			},
+			this.connection.host,
+			this.connection.port,
+		)
 	}
 
-	connectSocket(onStateUpdate?: (state: YTMPlayerState) => void, onConnectionChange?: (connected: boolean) => void): void {
+	connectSocket(
+		onStateUpdate?: (state: YTMPlayerState) => void,
+		onConnectionChange?: (connected: boolean) => void,
+	): void {
 		if (!this.connection?.token) {
 			throw new Error('Not authenticated')
 		}
@@ -178,7 +227,7 @@ export class YTMAPIClient {
 
 		this.socket = io(socketUrl, {
 			auth: {
-				token: this.connection.token
+				token: this.connection.token,
 			},
 			transports: ['websocket'],
 			forceNew: true,
@@ -186,7 +235,7 @@ export class YTMAPIClient {
 			reconnection: true,
 			reconnectionAttempts: this.maxReconnectAttempts,
 			reconnectionDelay: this.reconnectDelay,
-			reconnectionDelayMax: 10000 // Max 10 seconds between attempts
+			reconnectionDelayMax: 10000, // Max 10 seconds between attempts
 		})
 
 		this.socket.on('connect', () => {
@@ -198,7 +247,7 @@ export class YTMAPIClient {
 			this.reconnectAttempts = 0
 			this.reconnectDelay = 1000 // Reset delay on successful connection
 			this.onConnectionChange?.(true)
-			
+
 			// Request initial state via socket (doesn't count against rate limit)
 			console.log('[YTM Client] Requesting current state via socket...')
 			this.requestCurrentState()
@@ -230,7 +279,9 @@ export class YTMAPIClient {
 		})
 
 		this.socket.on('reconnect_attempt', (attemptNumber) => {
-			console.log(`[YTM Client] Reconnection attempt ${attemptNumber}/${this.maxReconnectAttempts}`)
+			console.log(
+				`[YTM Client] Reconnection attempt ${attemptNumber}/${this.maxReconnectAttempts}`,
+			)
 		})
 
 		this.socket.on('reconnect_error', (error) => {
@@ -265,7 +316,7 @@ export class YTMAPIClient {
 	}
 
 	isConnected(): boolean {
-		return this.socket?.connected || false
+		return this.socket?.connected
 	}
 
 	getCurrentConnection(): YTMConnection | null {
@@ -284,7 +335,7 @@ export class YTMAPIClient {
 			try {
 				this.connection = JSON.parse(saved)
 				this.tokenExpiryTime = this.connection?.tokenExpiryTime || null
-				
+
 				// Check if loaded token is expired
 				if (this.connection?.token && !this.isTokenValid()) {
 					console.warn('[YTM Client] Loaded token is expired, clearing connection')
@@ -321,12 +372,14 @@ export class YTMAPIClient {
 		}
 
 		this.reconnectAttempts++
-		const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1), 10000)
-		
-		console.log(`[YTM Client] Attempting reconnection in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
-		
+		const delay = Math.min(this.reconnectDelay * 2 ** (this.reconnectAttempts - 1), 10000)
+
+		console.log(
+			`[YTM Client] Attempting reconnection in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
+		)
+
 		await this.delay(delay)
-		
+
 		if (this.connection?.token) {
 			try {
 				// Test token validity before attempting socket reconnection
@@ -342,7 +395,7 @@ export class YTMAPIClient {
 
 	private handleConnectionError(error: any): void {
 		console.error('[YTM Client] Connection error:', error)
-		
+
 		// Handle specific error types
 		if (error.message?.includes('unauthorized') || error.message?.includes('forbidden')) {
 			console.warn('[YTM Client] Authentication error, clearing token')
@@ -352,9 +405,12 @@ export class YTMAPIClient {
 
 	private startHealthCheck(): void {
 		// Health check every 5 minutes
-		this.healthCheckInterval = setInterval(() => {
-			this.performHealthCheck()
-		}, 5 * 60 * 1000)
+		this.healthCheckInterval = setInterval(
+			() => {
+				this.performHealthCheck()
+			},
+			5 * 60 * 1000,
+		)
 	}
 
 	private stopHealthCheck(): void {
@@ -368,7 +424,7 @@ export class YTMAPIClient {
 		if (!this.connection?.token) return
 
 		// Check if token is nearing expiry (within 1 hour)
-		if (this.tokenExpiryTime && (Date.now() + 60 * 60 * 1000) >= this.tokenExpiryTime) {
+		if (this.tokenExpiryTime && Date.now() + 60 * 60 * 1000 >= this.tokenExpiryTime) {
 			console.warn('[YTM Client] Token expires soon, clearing connection for renewal')
 			this.clearConnection()
 			this.onConnectionChange?.(false)

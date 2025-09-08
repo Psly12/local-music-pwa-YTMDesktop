@@ -1,5 +1,5 @@
-import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
 import * as m from '$paraglide/messages.js'
+import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
 
 export const prerender = true
 
@@ -16,10 +16,10 @@ const manifest = {
 	description: 'Lightweight on device music player right in your browser.',
 	categories: ['music', 'entertainment'],
 	launch_handler: {
-		client_mode: 'focus-existing'
+		client_mode: 'focus-existing',
 	},
 	edge_side_panel: {
-		preferred_width: 400
+		preferred_width: 400,
 	},
 	shortcuts: [
 		{
@@ -27,8 +27,8 @@ const manifest = {
 			short_name: 'Play',
 			description: 'Start playing music',
 			url: '/?action=play',
-			icons: [{ src: '/icons/play-shortcut.png', sizes: '96x96' }]
-		}
+			icons: [{ src: '/icons/play-shortcut.png', sizes: '96x96' }],
+		},
 	],
 	prefer_related_applications: false,
 	start_behavior: 'standalone',

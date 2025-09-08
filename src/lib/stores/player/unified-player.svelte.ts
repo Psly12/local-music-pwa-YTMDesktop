@@ -1,9 +1,9 @@
-import { PlayerStore } from './player.svelte.ts'
-import { YTMPlayerStore } from './ytm-player.svelte.ts'
-import { ytmStore } from '$lib/services/ytm-api'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { YTMTrack } from '$lib/services/ytm-api'
+import { ytmStore } from '$lib/services/ytm-api'
 import type { PlayTrackOptions } from './player.svelte.ts'
+import { PlayerStore } from './player.svelte.ts'
+import { YTMPlayerStore } from './ytm-player.svelte.ts'
 
 export type PlayerMode = 'local' | 'ytm'
 
@@ -81,7 +81,9 @@ export class UnifiedPlayerStore {
 	}
 
 	get activeTrackIndex(): number {
-		return this._mode === 'ytm' ? this.ytmPlayer.activeTrackIndex : this.localPlayer.activeTrackIndex
+		return this._mode === 'ytm'
+			? this.ytmPlayer.activeTrackIndex
+			: this.localPlayer.activeTrackIndex
 	}
 
 	get artworkSrc(): string | undefined {
@@ -156,7 +158,9 @@ export class UnifiedPlayerStore {
 	// Local-only methods (with YTM warnings)
 	playTrack(trackIndex: number, queue?: readonly number[], options?: PlayTrackOptions): void {
 		if (this._mode === 'ytm') {
-			console.warn('playTrack not supported in YTM mode - use YouTube Music Desktop to select tracks')
+			console.warn(
+				'playTrack not supported in YTM mode - use YouTube Music Desktop to select tracks',
+			)
 			return
 		}
 		return this.localPlayer.playTrack(trackIndex, queue, options ?? {})
@@ -164,7 +168,9 @@ export class UnifiedPlayerStore {
 
 	addToQueue(trackId: number | number[]): void {
 		if (this._mode === 'ytm') {
-			console.warn('addToQueue not supported in YTM mode - use YouTube Music Desktop to manage queue')
+			console.warn(
+				'addToQueue not supported in YTM mode - use YouTube Music Desktop to manage queue',
+			)
 			return
 		}
 		return this.localPlayer.addToQueue(trackId)
@@ -172,7 +178,9 @@ export class UnifiedPlayerStore {
 
 	clearQueue(): void {
 		if (this._mode === 'ytm') {
-			console.warn('clearQueue not supported in YTM mode - use YouTube Music Desktop to manage queue')
+			console.warn(
+				'clearQueue not supported in YTM mode - use YouTube Music Desktop to manage queue',
+			)
 			return
 		}
 		return this.localPlayer.clearQueue()
