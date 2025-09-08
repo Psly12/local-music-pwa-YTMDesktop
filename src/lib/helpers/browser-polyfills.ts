@@ -4,7 +4,11 @@
 if (!('locks' in navigator)) {
 	// Simple polyfill that just executes the callback immediately
 	// This won't provide actual locking but prevents crashes
-	;(navigator as unknown as { locks: { request: (name: string, callback: () => Promise<unknown>) => Promise<unknown> } }).locks = {
+	;(
+		navigator as unknown as {
+			locks: { request: (name: string, callback: () => Promise<unknown>) => Promise<unknown> }
+		}
+	).locks = {
 		request: (_name: string, callback: () => Promise<unknown>) => {
 			return callback()
 		},
@@ -13,7 +17,9 @@ if (!('locks' in navigator)) {
 
 // AbortSignal.timeout polyfill for older browsers
 if (!('timeout' in AbortSignal)) {
-	;(AbortSignal as unknown as { timeout: (delay: number) => AbortSignal }).timeout = (delay: number) => {
+	;(AbortSignal as unknown as { timeout: (delay: number) => AbortSignal }).timeout = (
+		delay: number,
+	) => {
 		const controller = new AbortController()
 		setTimeout(() => controller.abort(), delay)
 		return controller.signal

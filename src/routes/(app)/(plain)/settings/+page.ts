@@ -2,7 +2,7 @@ interface LoadResult {
 	title: string
 }
 
-export const load = async (): Promise<LoadResult> => {
+export const load = (): LoadResult => {
 	return {
 		title: 'Settings',
 	}
