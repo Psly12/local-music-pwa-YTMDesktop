@@ -2,6 +2,7 @@
 	import type { ClassValue } from 'svelte/elements'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
+	import { base } from '$app/paths'
 	import * as m from '$paraglide/messages.js'
 	import IconButton from './IconButton.svelte'
 
@@ -23,14 +24,14 @@
 	const handleBackClick = () => {
 		// If we're in settings, always go to player
 		if (page.url.pathname.includes('/settings')) {
-			void goto('/player')
+			void goto(`${base}/player`)
 			return
 		}
 
 		if (canGoBack()) {
 			window.history.back()
 		} else {
-			void goto('/')
+			void goto(`${base}/`)
 		}
 	}
 </script>
