@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -159,7 +160,7 @@
 	<div class="flex items-center justify-between p-4">
 		<div>{m.about()}</div>
 
-		<IconButton as="a" href="/about" tooltip={m.about()} icon="chevronRight" />
+		<IconButton as="a" href="{base}/about" tooltip={m.about()} icon="chevronRight" />
 	</div>
 </section>
 

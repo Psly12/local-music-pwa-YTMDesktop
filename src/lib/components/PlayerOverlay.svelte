@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths'
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
@@ -35,7 +36,7 @@
 			<div class="flex min-w-0 grow items-center">
 				<Button
 					as="a"
-					href="/player"
+					href="{base}/player"
 					kind="blank"
 					tooltip={m.playerOpenFullPlayer()}
 					class="max-sm:rounded-r-4 group flex min-h-12 grow touch-manipulation items-center rounded-lg pr-2 max-sm:p-2 sm:h-11 sm:min-h-auto sm:max-w-45 sm:p-2"

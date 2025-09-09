@@ -193,7 +193,12 @@
 					<LikeButton />
 
 					{#if layoutMode === 'list'}
-						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
+						<IconButton
+							tooltip={m.playerOpenQueue()}
+							icon="trayFull"
+							as="a"
+							href="{base}/player/queue"
+						/>
 					{/if}
 				</div>
 			</div>

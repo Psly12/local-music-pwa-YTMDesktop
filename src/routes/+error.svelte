@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths'
 	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 
@@ -18,5 +19,5 @@
 		<div class="mt-2 text-body-lg">{m.errorPageDoesNotExist()}</div>
 	{/if}
 
-	<Button as="a" href="/library/tracks" class="mt-4 w-full">Go home</Button>
+	<Button as="a" href="{base}/library/tracks" class="mt-4 w-full">Go home</Button>
 </div>
