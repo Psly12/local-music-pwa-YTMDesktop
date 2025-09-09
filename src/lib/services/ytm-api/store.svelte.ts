@@ -1,3 +1,4 @@
+import { base } from '$app/paths'
 import { logger } from '$lib/helpers/logger.ts'
 import { YTMAPIClient } from './client.js'
 import type {
@@ -469,7 +470,7 @@ class YTMStore {
 		try {
 			// Use our server-side YouTube search API
 			const response = await fetch(
-				`/api/youtube-search?q=${encodeURIComponent(query)}&limit=20`,
+				`${base}/api/youtube-search?q=${encodeURIComponent(query)}&limit=20`,
 			)
 
 			if (!response.ok) {
