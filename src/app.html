@@ -34,12 +34,17 @@
 		<title>Snae Player</title>
 
 		<meta name="description" content="Lightweight on device music player right in your browser." />
-		<link rel="icon" href="/icons/responsive.svg" type="image/svg+xml" />
-		<link rel="alternate icon" href="/icons/only-for-safari.png" sizes="16x16" type="image/png" />
+		<link rel="icon" href="%sveltekit.assets%/icons/responsive.svg" type="image/svg+xml" />
+		<link
+			rel="alternate icon"
+			href="%sveltekit.assets%/icons/only-for-safari.png"
+			sizes="16x16"
+			type="image/png"
+		/>
 
 		<link
 			rel="preload"
-			href="/fonts/Heebo.latin.woff2"
+			href="%sveltekit.assets%/fonts/Heebo.latin.woff2"
 			as="font"
 			type="font/woff2"
 			crossorigin="anonymous"
@@ -47,7 +52,7 @@
 
 		%sveltekit.head%
 
-		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 	</head>
 
 	<body>
@@ -69,6 +74,6 @@
 
 		<!-- Analytics disabled in development -->
 
-		<script defer src="/supported-browser-check.js"></script>
+		<script defer src="%sveltekit.assets%/supported-browser-check.js"></script>
 	</body>
 </html>
