@@ -23,7 +23,7 @@
 
 	const handleBackClick = () => {
 		// If we're in settings, always go to player
-		if (page.url.pathname.includes('/settings')) {
+		if (page.url.pathname.includes(`${base}/settings`) || page.url.pathname.includes('/settings')) {
 			void goto(`${base}/player`)
 			return
 		}
