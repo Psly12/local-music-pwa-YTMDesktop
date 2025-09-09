@@ -15,7 +15,7 @@
 
 <Button
 	tooltip={player.playing ? m.playerPause() : m.playerPlay()}
-	class={["w-18 !p-0", className]}
+	class={['w-18 !p-0', className]}
 	disabled={!player.activeTrack}
 	onclick={() => player.togglePlay()}
 >

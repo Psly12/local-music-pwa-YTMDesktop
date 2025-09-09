@@ -84,7 +84,7 @@
 	const getTransform = (calc = '') => `transform: translateX(calc(${progressPercentage}% ${calc}));`
 </script>
 
-<div class={["relative flex w-full select-none", className]} bind:clientWidth={trackWidth}>
+<div class={['relative flex w-full select-none', className]} bind:clientWidth={trackWidth}>
 	<input
 		type="range"
 		bind:value
