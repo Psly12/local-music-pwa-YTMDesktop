@@ -420,7 +420,7 @@ export class YTMPlayerStore {
 
 	get isLiked(): boolean {
 		// Get like status from current track (2 = liked, 1 = disliked, 0 = neutral)
-		return (ytmStore.state?.video as any)?.likeStatus === 2
+		return (ytmStore.state?.video as { likeStatus?: number })?.likeStatus === 2
 	}
 
 	// Auto-connect on startup - only restore existing valid connections

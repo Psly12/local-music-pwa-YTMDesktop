@@ -1,6 +1,7 @@
 import { logger } from '$lib/helpers/logger.ts'
 import { YTMAPIClient } from './client.js'
 import type {
+	YTMCommandData,
 	YTMConnection,
 	YTMPlayerState,
 	YTMPlaylist,
@@ -91,7 +92,7 @@ class YTMStore {
 	}
 
 	get queue(): YTMTrack[] {
-		return ((this.playerState?.player?.queue?.items || []) as unknown) as YTMTrack[]
+		return (this.playerState?.player?.queue?.items || []) as unknown as YTMTrack[]
 	}
 
 	async connect(host = '127.0.0.1', port = 9863): Promise<boolean> {
@@ -356,7 +357,7 @@ class YTMStore {
 		if (!this.connected) {
 			return
 		}
-		await this.client.sendCommand('setVolume', volume as any)
+		await this.client.sendCommand('setVolume', volume as unknown as YTMCommandData)
 	}
 
 	async volumeUp(): Promise<void> {
@@ -391,14 +392,14 @@ class YTMStore {
 		if (!this.connected) {
 			return
 		}
-		await this.client.sendCommand('seekTo', position as any)
+		await this.client.sendCommand('seekTo', position as unknown as YTMCommandData)
 	}
 
 	async playTrackAtIndex(index: number): Promise<void> {
 		if (!this.connected) {
 			return
 		}
-		await this.client.sendCommand('playQueueIndex', index as any)
+		await this.client.sendCommand('playQueueIndex', index as unknown as YTMCommandData)
 	}
 
 	async likeTrack(): Promise<void> {
@@ -430,7 +431,7 @@ class YTMStore {
 		// Based on working code, repeat cycles through modes 0,1,2
 		const currentMode = this.playerState?.player?.queue?.repeatMode || 0
 		const nextMode = (currentMode + 1) % 3
-		await this.client.sendCommand('repeatMode', nextMode as any)
+		await this.client.sendCommand('repeatMode', nextMode as unknown as YTMCommandData)
 	}
 
 	getCurrentConnection(): YTMConnection | null {

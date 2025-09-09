@@ -1,8 +1,8 @@
 <script lang="ts">
-	import PlayPauseIcon from '../../animated-icons/PlayPauseIcon.svelte'
-	import Button from '../../Button.svelte'
 	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import * as m from '$paraglide/messages'
+	import PlayPauseIcon from '../../animated-icons/PlayPauseIcon.svelte'
+	import Button from '../../Button.svelte'
 
 	interface Props {
 		class?: string

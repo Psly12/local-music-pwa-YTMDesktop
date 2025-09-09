@@ -105,7 +105,10 @@ export class YTMAPIClient {
 			}
 		} catch (error) {
 			// Handle network errors with retry
-			if (retryCount < 3 && (error instanceof TypeError || (error as Error).message?.includes('fetch'))) {
+			if (
+				retryCount < 3 &&
+				(error instanceof TypeError || (error as Error).message?.includes('fetch'))
+			) {
 				console.warn(
 					`[YTM Client] Network error, retrying... (${retryCount + 1}/3)`,
 					(error as Error).message,
