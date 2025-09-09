@@ -41,7 +41,8 @@
       "Bash(git mv:*)",
       "Bash(rg:*)",
       "Bash(ls:*)",
-      "Bash(timeout 30 pnpm run build)"
+      "Bash(timeout 30 pnpm run build)",
+      "Bash(git remote get-url:*)"
     ],
     "deny": [],
     "ask": []
