@@ -1,7 +1,6 @@
 <script lang="ts">
-	
 	import { base } from '$app/paths'
-import { page } from '$app/state'
+	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
@@ -292,7 +291,12 @@ import { page } from '$app/state'
 								No music playing. Start playing music in YouTube Music Desktop.
 							{/if}
 						</div>
-						<Button kind="outlined" as="a" href="{base}/settings" class="min-h-12 touch-manipulation">
+						<Button
+							kind="outlined"
+							as="a"
+							href="{base}/settings"
+							class="min-h-12 touch-manipulation"
+						>
 							Open Settings
 						</Button>
 					</div>
@@ -342,7 +346,12 @@ import { page } from '$app/state'
 							<div class="mb-4 text-body-lg">
 								Connect to YouTube Music Desktop to see your playlists
 							</div>
-							<Button kind="outlined" as="a" href="{base}/settings" class="min-h-12 touch-manipulation">
+							<Button
+								kind="outlined"
+								as="a"
+								href="{base}/settings"
+								class="min-h-12 touch-manipulation"
+							>
 								Open Settings
 							</Button>
 						</div>
